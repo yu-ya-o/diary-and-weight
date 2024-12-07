@@ -1,0 +1,48 @@
+PODS:
+  - Flutter (1.0.0)
+  - in_app_review (0.2.0):
+    - Flutter
+  - ObjectBox (1.8.1)
+  - objectbox_flutter_libs (0.0.1):
+    - Flutter
+    - ObjectBox (= 1.8.1)
+  - path_provider_foundation (0.0.1):
+    - Flutter
+    - FlutterMacOS
+  - url_launcher_ios (0.0.1):
+    - Flutter
+
+DEPENDENCIES:
+  - Flutter (from `Flutter`)
+  - in_app_review (from `.symlinks/plugins/in_app_review/ios`)
+  - objectbox_flutter_libs (from `.symlinks/plugins/objectbox_flutter_libs/ios`)
+  - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/darwin`)
+  - url_launcher_ios (from `.symlinks/plugins/url_launcher_ios/ios`)
+
+SPEC REPOS:
+  trunk:
+    - ObjectBox
+
+EXTERNAL SOURCES:
+  Flutter:
+    :path: Flutter
+  in_app_review:
+    :path: ".symlinks/plugins/in_app_review/ios"
+  objectbox_flutter_libs:
+    :path: ".symlinks/plugins/objectbox_flutter_libs/ios"
+  path_provider_foundation:
+    :path: ".symlinks/plugins/path_provider_foundation/darwin"
+  url_launcher_ios:
+    :path: ".symlinks/plugins/url_launcher_ios/ios"
+
+SPEC CHECKSUMS:
+  Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
+  in_app_review: 318597b3a06c22bb46dc454d56828c85f444f99d
+  ObjectBox: a7900d5335218cd437cbc080b7ccc38a5211f7b4
+  objectbox_flutter_libs: 61d74196d924fbc773da5f5757d1e9fab7b3cc78
+  path_provider_foundation: 2b6b4c569c0fb62ec74538f866245ac84301af46
+  url_launcher_ios: 5334b05cef931de560670eeae103fd3e431ac3fe
+
+PODFILE CHECKSUM: b8542614aec8767bc1398a33de5c54e3592a72c6
+
+COCOAPODS: 1.15.2
