@@ -15,6 +15,10 @@ import 'package:disiry_weight_mng/provider/theme-color.dart';
 import 'dart:async';
 import 'package:in_app_review/in_app_review.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:flutter_native_timezone/flutter_native_timezone.dart';
+import 'package:timezone/timezone.dart' as tz;
+import 'package:timezone/data/latest.dart' as tz;
 
 class CalendarPage extends ConsumerStatefulWidget {
   const CalendarPage({super.key});
@@ -24,6 +28,63 @@ class CalendarPage extends ConsumerStatefulWidget {
 }
 
 class _CalendarPageState extends ConsumerState<CalendarPage> {
+  // 通知設定
+  final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+      FlutterLocalNotificationsPlugin();
+
+  Future<void> _initializeNotifications() async {
+    const DarwinInitializationSettings initializationSettingsDarwin =
+        DarwinInitializationSettings(
+      requestAlertPermission: true,
+      requestBadgePermission: true,
+      requestSoundPermission: true,
+    );
+    const InitializationSettings initializationSettings =
+        InitializationSettings(
+      iOS: initializationSettingsDarwin,
+    );
+    await flutterLocalNotificationsPlugin.initialize(initializationSettings);
+  }
+
+  Future<void> _addNotification() async {
+    // 設定されている全ての通知を削除
+    await flutterLocalNotificationsPlugin.cancelAll();
+    // Local TimeZone
+    String timeZoneName = await FlutterNativeTimezone.getLocalTimezone();
+    final location = tz.getLocation(timeZoneName);
+
+    // 現在時刻を取得
+    tz.TZDateTime scheduledTime = tz.TZDateTime.from(
+        DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day,
+            20, 0),
+        location);
+
+    int noticeDays = 14;
+
+    for (int i = 0; i < noticeDays; i++) {
+      // Setting Notifications
+      if (i != 0) {
+        scheduledTime = scheduledTime.add(const Duration(days: 1));
+      }
+      flutterLocalNotificationsPlugin.zonedSchedule(
+        i,
+        '日記と体重',
+        'お疲れ様です！今日もちょこっとだけ日記と体重を記録をしませんか？',
+        scheduledTime,
+        const NotificationDetails(
+          iOS: DarwinNotificationDetails(),
+        ),
+        uiLocalNotificationDateInterpretation:
+            UILocalNotificationDateInterpretation.absoluteTime,
+      );
+    }
+  }
+
+  Future<void> _initializeAndScheduleNotifications() async {
+    await _initializeNotifications();
+    await _addNotification();
+  }
+
   // 日記なしメッセージ
   final String unWritingDiary = 'どんな一日でしたか？\n１行だけでも書いてみましょう';
 
@@ -130,6 +191,9 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
   @override
   void initState() {
     super.initState();
+    // 通知追加
+    tz.initializeTimeZones();
+    _initializeAndScheduleNotifications();
     // 今日の体重取得
     weightList = objectBox.getWeight(selectedDay: _focusedDay.toString());
     // 今日の日記取得
