@@ -19,6 +19,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_native_timezone/flutter_native_timezone.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest.dart' as tz;
+import 'package:flutter_svg/svg.dart';
 
 class CalendarPage extends ConsumerStatefulWidget {
   const CalendarPage({super.key});
@@ -91,10 +92,10 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
   String randomMorningMessage = '';
 
   final List<String> scrollMorningMessages = [
-    'おはようございます。暖かくしてお出かけしましょうね！',
-    'Good Morning! 良い一日になりますように！',
-    'Mucho gusto! スペイン語の"はじめまして"です。',
-    'おはようございます。今日は何をしたいですか？',
+    'おはようございます。暖かくしてお出かけしましょうね！通知設定をONにして記入忘れを防ぎましょう！',
+    'Good Morning! 良い一日になりますように！通知設定をONにして記入忘れを防ぎましょう！',
+    'Mucho gusto! スペイン語の"はじめまして"です。通知設定をONにして記入忘れを防ぎましょう！',
+    'おはようございます。今日は何をしたいですか？通知設定をONにして記入忘れを防ぎましょう！',
     // '食欲の秋、読書の秋、スポーツの秋！たのしい季節ですね！'
   ];
 
@@ -107,9 +108,9 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
   String randomDayMessage = '';
 
   final List<String> scrollDayMessages = [
-    '年末はなんだか寂しい気持ちになることありますよね',
-    'こんにちは。マイペースにやっていきましょうね！',
-    'こんにちは。疲れたときは甘いもの食べて休憩しましょう。',
+    '年末はなんだか寂しい気持ちになることありますよね。設定でアプリの色を変更することができます。気分転換にどうですか？',
+    'こんにちは。マイペースにやっていきましょうね！通知設定をONにして記入忘れを防ぎましょう！',
+    'こんにちは。疲れたときは甘いもの食べて休憩しましょう。通知設定をONにして記入忘れを防ぎましょう！',
     // '食欲の秋、読書の秋、スポーツの秋！たのしい季節ですね！'
   ];
 
@@ -122,16 +123,56 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
   String randomNightMessage = '';
 
   final List<String> scrollNightMessages = [
-    '今年もあと少し。どんな一年でしたか？',
-    'Mucho gusto! スペイン語の”はじめまして”です。',
-    'こんばんは！寒くなってきたので、暖かくして過ごしましょうね。',
-    '年末はなんだか寂しい気持ちになることありますよね'
+    '今年もあと少しですね。どんな一年でしたか？まだまだ楽しい思い出たくさんつくっていきましょうね！',
+    'Mucho gusto! スペイン語の”はじめまして”です。通知設定をONにして記入忘れを防ぎましょう！',
+    'こんばんは！寒くなってきたので、暖かくして過ごしましょうね。通知設定をONにして記入忘れを防ぎましょう！',
+    '年末はなんだか寂しい気持ちになることありますよね。設定でアプリの色を変更することができます。気分転換にどうですか？'
   ];
 
   String getScrollNightMessage() {
     final random = Random();
     final index = random.nextInt(scrollNightMessages.length);
     return randomNightMessage = scrollNightMessages[index];
+  }
+
+  String randomMamechishiki = '';
+
+  final List<String> scrollMamechishiki = [
+    '「バナナはベリーの一種」\n実は、植物学的に言うとバナナはベリーに分類されます。一方で、イチゴはベリーではありません！',
+    '「コアラの指紋は人間とそっくり」\nコアラの指紋は非常に人間のものに似ていて、指紋鑑定でも区別がつかないほどです。',
+    '「タコには心臓が3つある」\nタコの体には3つの心臓があり、そのうち1つは酸素を体全体に送り、残りの2つはエラに血液を送ります。',
+    '「チョコレートは宇宙食として承認されている」\nNASAの宇宙飛行士たちが宇宙で食べることができる食品リストにはチョコレートが含まれています。',
+    '「イルカは名前でお互いを呼び合う」\nイルカは独自の「笛」の音でお互いを識別し、それが名前のような役割を果たしています。',
+    '「雷は火よりも熱い」\n雷の温度は約30,000度で、これは太陽の表面温度の約5倍に相当します。',
+    '「ハチは紫外線を見ることができる」\n人間には見えない紫外線を見ることができ、これを使って花を見つけます。',
+    '「きゅうりの水分量は約95％」\nきゅうりのほとんどは水でできており、暑い日には水分補給に役立ちます。',
+    '「カメレオンの舌は体長の2倍の長さ」\nカメレオンの舌は体の2倍以上の長さがあり、獲物を捕まえるのに使われます。',
+    '「人間の鼻は5万種類以上の匂いを覚えられる」\n鼻は驚くべき能力を持ち、複雑な匂いをかぎ分けて記憶することができます。',
+    '「イギリスのビッグ・ベン」\nよく「時計台」そのものを指すと思われがちですが、ビッグ・ベンという名前は中にある巨大な鐘を指しています。',
+    '「アメリカの名前の由来」\nアメリカの名前は、イタリアの探検家アメリゴ・ヴェスプッチ（Amerigo Vespucci）にちなんでいます。',
+    '「ナマケモノのトイレ」\nナマケモノは代謝が非常に遅いため、トイレに行くのは1週間に1回程度です。',
+    '「カバの汗」\nカバは日焼け止めや乾燥を防ぐ役割を持つ特殊な汗をかき、この汗は赤い色に見えます。',
+  ];
+
+  String getScrollMamechishiki() {
+    final random = Random();
+    final index = random.nextInt(scrollMamechishiki.length);
+    return randomMamechishiki = scrollMamechishiki[index];
+  }
+
+  String randomPicto = '';
+
+  final List<String> pictos = [
+    'assets/pictogram1.svg',
+    'assets/pictogram2.svg',
+    'assets/pictogram3.svg',
+    'assets/pictogram4.svg'
+  ];
+
+  String getPicto() {
+    final random = Random();
+    final index = random.nextInt(pictos.length);
+    return randomPicto = pictos[index];
   }
 
   // スクロールメッセージ
@@ -293,13 +334,17 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
     // スクロールメッセージ
     int nowHour = DateTime.now().hour;
     if (nowHour >= 4 && nowHour <= 10) {
-      scrollMessage = getScrollMorningMessage();
+      // scrollMessage = getScrollMorningMessage();
+      scrollMessage = getScrollMamechishiki();
     } else if (nowHour >= 11 && nowHour <= 17) {
-      scrollMessage = getScrollDayMessage();
+      // scrollMessage = getScrollDayMessage();
+      scrollMessage = getScrollMamechishiki();
     } else if (nowHour >= 18 && nowHour <= 24) {
-      scrollMessage = getScrollNightMessage();
+      // scrollMessage = getScrollNightMessage();
+      scrollMessage = getScrollMamechishiki();
     } else if (nowHour <= 3) {
-      scrollMessage = getScrollNightMessage();
+      // scrollMessage = getScrollNightMessage();
+      scrollMessage = getScrollMamechishiki();
     } else {
       scrollMessage = 'こんにちは。良い日になりますように。';
     }
@@ -681,15 +726,31 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
           ),
         ),
         Container(
-          width: MediaQuery.sizeOf(context).width,
-          padding: const EdgeInsets.fromLTRB(10, 10, 10, 5),
           decoration: const BoxDecoration(
             color: Color(0xFFF5F5F5),
           ),
-          child: ScrollAnimation(
-            child: Text(
-              '$scrollMessage     今月の平均：${averageWeight.toStringAsFixed(2)}kg     1ヶ月前：${lastMonthWeight}kg     1年前：${lastYearWeight}kg',
-              style: const TextStyle(fontSize: 15, color: Colors.black54),
+          child: Container(
+            margin: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start, // 縦方向の揃え方
+              children: [
+                Container(
+                  child: SvgPicture.asset(
+                    getPicto(),
+                    width: 50,
+                    height: 50,
+                  ),
+                ),
+                const SizedBox(width: 20), // アイコンとテキストの間にスペースを追加
+                Expanded(
+                  child: Text(
+                    scrollMessage,
+                    style: const TextStyle(fontSize: 13), // テキストスタイルを設定（任意）
+                    softWrap: true, // 折り返しを有効にする
+                    overflow: TextOverflow.clip, // テキストがあふれないように設定
+                  ),
+                ),
+              ],
             ),
           ),
         ),
@@ -698,7 +759,7 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
             color: Color(0xFFF5F5F5),
           ),
           child: Container(
-            margin: const EdgeInsets.fromLTRB(10, 10, 10, 200),
+            margin: const EdgeInsets.fromLTRB(20, 20, 20, 10),
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(15),
@@ -742,100 +803,106 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
                   },
                   behavior: HitTestBehavior.opaque,
                   child: Container(
-                      padding: const EdgeInsets.all(10),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.fromLTRB(20, 5, 0, 0),
-                            child: Column(
-                              children: [
-                                const Text(
-                                  '今日の体重',
-                                  style: TextStyle(
-                                      fontSize: 12, color: Colors.black54),
-                                ),
-                                Text(
-                                  '$todayWeight kg',
-                                  style: const TextStyle(
-                                      fontSize: 30, color: Colors.black54),
-                                ),
-                              ],
+                    padding: const EdgeInsets.all(10),
+                    child: Column(
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.fromLTRB(20, 15, 0, 0),
+                              child: Column(
+                                children: [
+                                  const Text(
+                                    '今日の体重',
+                                    style: TextStyle(
+                                        fontSize: 12, color: Colors.black54),
+                                  ),
+                                  Text(
+                                    '$todayWeight kg',
+                                    style: const TextStyle(
+                                        fontSize: 30, color: Colors.black54),
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
-                          Container(
-                            margin: const EdgeInsets.fromLTRB(0, 10, 0, 0),
-                            child: Row(
-                              children: [
-                                Column(children: [
-                                  Container(
-                                    margin:
-                                        const EdgeInsets.fromLTRB(0, 0, 5, 5),
-                                    width: 70,
-                                    alignment: Alignment.center,
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(5),
-                                      color: themeColor.withOpacity(0.7),
-                                    ),
-                                    child: const Text(
-                                      'BMI',
-                                      style: TextStyle(
-                                          color: Colors.white, fontSize: 13),
-                                    ),
-                                  ),
-                                  Container(
-                                    margin:
-                                        const EdgeInsets.fromLTRB(0, 0, 5, 5),
-                                    width: 70,
-                                    alignment: Alignment.center,
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(5),
-                                      color: themeColor.withOpacity(0.7),
-                                    ),
-                                    child: const Text(
-                                      '目標まで',
-                                      style: TextStyle(
-                                          color: Colors.white, fontSize: 13),
-                                    ),
-                                  ),
-                                ]),
-                                Column(
-                                  children: [
+                            Container(
+                              margin: const EdgeInsets.fromLTRB(0, 10, 0, 0),
+                              child: Row(
+                                children: [
+                                  Column(children: [
                                     Container(
                                       margin:
                                           const EdgeInsets.fromLTRB(0, 0, 5, 5),
-                                      child: Text(
-                                        '$bmi',
-                                        style: const TextStyle(
-                                            color: Colors.black54),
+                                      width: 70,
+                                      alignment: Alignment.center,
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(5),
+                                        color: themeColor.withOpacity(0.7),
+                                      ),
+                                      child: const Text(
+                                        'BMI',
+                                        style: TextStyle(
+                                            color: Colors.white, fontSize: 13),
                                       ),
                                     ),
                                     Container(
                                       margin:
                                           const EdgeInsets.fromLTRB(0, 0, 5, 5),
-                                      child: Text(
-                                        '$untilTarget kg',
-                                        style: const TextStyle(
-                                            color: Colors.black54),
+                                      width: 70,
+                                      alignment: Alignment.center,
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(5),
+                                        color: themeColor.withOpacity(0.7),
                                       ),
-                                    )
-                                  ],
-                                ),
-                              ],
+                                      child: const Text(
+                                        '目標まで',
+                                        style: TextStyle(
+                                            color: Colors.white, fontSize: 13),
+                                      ),
+                                    ),
+                                  ]),
+                                  Column(
+                                    children: [
+                                      Container(
+                                        margin: const EdgeInsets.fromLTRB(
+                                            0, 0, 5, 5),
+                                        child: Text(
+                                          '$bmi',
+                                          style: const TextStyle(
+                                              color: Colors.black54),
+                                        ),
+                                      ),
+                                      Container(
+                                        margin: const EdgeInsets.fromLTRB(
+                                            0, 0, 5, 5),
+                                        child: Text(
+                                          '$untilTarget kg',
+                                          style: const TextStyle(
+                                              color: Colors.black54),
+                                        ),
+                                      )
+                                    ],
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
-                          const Icon(
-                            Icons.chevron_right,
-                            color: Colors.black38,
-                          )
-                        ],
-                      )),
+                            const Icon(
+                              Icons.chevron_right,
+                              color: Colors.black38,
+                            )
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
                 Container(
                     child: const Divider(
                   indent: 10,
                   endIndent: 10,
-                  thickness: 1,
+                  thickness: 0.5,
+                  color: Color.fromRGBO(238, 238, 238, 1),
                 )),
                 GestureDetector(
                   onTap: () async {
@@ -887,6 +954,94 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
             ),
           ),
         ),
+        Container(
+            decoration: const BoxDecoration(
+              color: Color(0xFFF5F5F5),
+            ),
+            child: Container(
+                padding: const EdgeInsets.fromLTRB(0, 5, 0, 5),
+                margin: const EdgeInsets.fromLTRB(20, 0, 20, 200),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(10),
+                  boxShadow: const [
+                    BoxShadow(
+                      color: Color.fromRGBO(238, 238, 238, 1),
+                      spreadRadius: 1,
+                      blurRadius: 5,
+                      offset: Offset(1, 1),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    Container(),
+                    Column(
+                      children: [
+                        Container(
+                          child: Text(
+                            '今月の平均',
+                            style: const TextStyle(
+                                fontSize: 11, color: Colors.black54),
+                          ),
+                        ),
+                        Container(
+                          child: Text(
+                            '${averageWeight.toStringAsFixed(2)}kg',
+                            style: const TextStyle(
+                                fontSize: 13, color: Colors.black54),
+                          ),
+                        )
+                      ],
+                    ),
+                    Container(
+                        height: 20,
+                        child: const VerticalDivider(
+                            thickness: 0.5, color: Colors.grey)),
+                    Column(
+                      children: [
+                        Container(
+                          child: Text(
+                            '先月の体重',
+                            style: const TextStyle(
+                                fontSize: 11, color: Colors.black54),
+                          ),
+                        ),
+                        Container(
+                          child: Text(
+                            '${lastMonthWeight}kg',
+                            style: const TextStyle(
+                                fontSize: 13, color: Colors.black54),
+                          ),
+                        )
+                      ],
+                    ),
+                    Container(
+                        height: 20,
+                        child: const VerticalDivider(
+                            thickness: 0.5, color: Colors.grey)),
+                    Column(
+                      children: [
+                        Container(
+                          child: Text(
+                            '去年の体重',
+                            style: const TextStyle(
+                                fontSize: 11, color: Colors.black54),
+                          ),
+                        ),
+                        Container(
+                          child: Text(
+                            '${lastYearWeight}kg',
+                            style: const TextStyle(
+                                fontSize: 13, color: Colors.black54),
+                          ),
+                        )
+                      ],
+                    ),
+                    Container(),
+                  ],
+                ))),
       ])),
     );
   }
