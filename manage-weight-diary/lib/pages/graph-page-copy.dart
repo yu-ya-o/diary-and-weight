@@ -7,14 +7,14 @@ import 'package:month_picker_dialog/month_picker_dialog.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:disiry_weight_mng/provider/theme-color.dart';
 
-class GraphPage extends ConsumerStatefulWidget {
-  const GraphPage({super.key});
+class GraphPageCopy extends ConsumerStatefulWidget {
+  const GraphPageCopy({super.key});
 
   @override
-  _GraphPageState createState() => _GraphPageState();
+  _GraphPageCopyState createState() => _GraphPageCopyState();
 }
 
-class _GraphPageState extends ConsumerState<GraphPage> {
+class _GraphPageCopyState extends ConsumerState<GraphPageCopy> {
   @override
   void initState() {
     super.initState();
@@ -205,7 +205,7 @@ class _WeightChartState extends ConsumerState<WeightChart> {
                 ),
               ),
               Text(
-                '${displayDate.year}年${displayDate.month}月 〜',
+                '${displayDate.year}年${displayDate.month}月 ~',
                 style: const TextStyle(color: Colors.black54, fontSize: 16),
               ),
             ],

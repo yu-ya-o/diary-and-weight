@@ -58,6 +58,57 @@ class ObjectBox {
     weightBox.put(Weight(date: focusedDay, weight: weight, datetime: datetime));
   }
 
+  int countConsecutiveDates() {
+    // 今日の日付（時刻を削除）
+    final today = DateTime.now();
+    final todayOnly = DateTime(today.year, today.month, today.day);
+    final yesterdayOnly = todayOnly.subtract(Duration(days: 1));
+
+    // 今日までのデータを取得し、日付順にソート
+    final weights = weightBox
+        .query(Weight_.datetime.lessOrEqual(todayOnly.millisecondsSinceEpoch))
+        .order(Weight_.datetime)
+        .build()
+        .find();
+
+    if (weights.isEmpty) {
+      return 0; // データがない場合は 0
+    }
+
+    // 最新の日付を取得（時刻を削除）
+    DateTime lastDate = DateTime(
+      weights.last.datetime.year,
+      weights.last.datetime.month,
+      weights.last.datetime.day,
+    );
+
+    // 最新の日付が「今日」または「昨日」でなければ 0 を返す
+    if (lastDate != todayOnly && lastDate != yesterdayOnly) {
+      return 0;
+    }
+
+    int count = 1; // 連続日数（データが1つでもあれば1から開始）
+
+    // 連続する日付をカウント
+    for (int i = weights.length - 2; i >= 0; i--) {
+      final prevDate = DateTime(
+        weights[i].datetime.year,
+        weights[i].datetime.month,
+        weights[i].datetime.day,
+      );
+
+      // 連続している場合のみカウント
+      if (lastDate.difference(prevDate).inDays == 1) {
+        count++;
+        lastDate = prevDate; // 更新
+      } else {
+        break; // 連続が途切れたら終了
+      }
+    }
+
+    return count;
+  }
+
   List<Diary> getDiary({required String selectedDay}) {
     Query<Diary> diaryQuery =
         diaryBox.query(Diary_.writingDate.equals(selectedDay)).build();

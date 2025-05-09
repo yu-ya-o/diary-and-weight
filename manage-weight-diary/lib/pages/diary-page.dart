@@ -1,5 +1,6 @@
 import 'package:disiry_weight_mng/main.dart';
 import 'package:disiry_weight_mng/pages/diary-writing-page.dart';
+import 'package:disiry_weight_mng/pages/news-letter.dart';
 import 'package:flutter/material.dart';
 import '../entity/diary.dart';
 import 'package:month_picker_dialog/month_picker_dialog.dart';
@@ -19,11 +20,83 @@ class _DiaryPageState extends ConsumerState<DiaryPage> {
 
   Color themeColor = Colors.blue;
 
+  void pushWithReloadByDiaryWriting(
+      BuildContext context, DateTime datetime) async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute<bool>(
+        builder: (BuildContext context) =>
+            DiaryWritingPage(focusedDay: datetime),
+      ),
+    );
+
+    setState(() {
+      displayDate = DateTime(datetime.year, datetime.month, 1);
+      diaryList = objectBox.getDiaryForDateTime(displayDate);
+    });
+  }
+
+  Future<void> _showStartDialog() async {
+    return showDialog<void>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: Colors.white,
+          title: Row(
+            children: [
+              Text(
+                "「日記と体重」運営者の日記",
+                style: TextStyle(color: Colors.black54, fontSize: 20),
+              )
+            ],
+          ),
+          content: Container(
+            height: 200,
+            child: Column(
+              children: [
+                Container(
+                    padding: EdgeInsets.fromLTRB(25, 0, 25, 0),
+                    child: Image.asset('assets/newsletter.png')),
+                Text(
+                  "「日記と体重」運営者の日記を不定期でお届けしています。",
+                  style: TextStyle(color: Colors.black54),
+                ),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            // ボタン領域
+            TextButton(
+              child: Text(
+                "閉じる",
+                style: TextStyle(color: themeColor),
+              ),
+              onPressed: () => Navigator.pop(context),
+            ),
+            TextButton(
+              child: Text("確認する", style: TextStyle(color: themeColor)),
+              onPressed: () {
+                Navigator.pop(context);
+                Navigator.of(context).push<void>(
+                  MaterialPageRoute(
+                    builder: (context) => NewsLetterPage(),
+                  ),
+                );
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   void initState() {
     super.initState();
     displayDate = DateTime.now();
     diaryList = objectBox.getDiaryForDateTime(displayDate);
+
+    // WidgetsBinding.instance.addPostFrameCallback((_) => _showStartDialog());
   }
 
   @override
@@ -108,19 +181,6 @@ class _DiaryPageState extends ConsumerState<DiaryPage> {
           '${displayDate.toString().substring(0, 4)}年${displayDate.toString().substring(5, 7)}月の日記',
           style: const TextStyle(color: Colors.black54, fontSize: 18),
         ),
-        actions: [
-          IconButton(
-              padding: const EdgeInsets.fromLTRB(0, 5, 0, 0),
-              onPressed: () {
-                setState(() {
-                  displayDate = displayDate;
-                });
-              },
-              icon: const Icon(
-                Icons.refresh,
-                color: Colors.black54,
-              ))
-        ],
         centerTitle: true,
       ),
       body: ListView.builder(
@@ -128,17 +188,13 @@ class _DiaryPageState extends ConsumerState<DiaryPage> {
         itemBuilder: (context, index) {
           return GestureDetector(
               onTap: () {
-                Navigator.of(context)
-                    .push(MaterialPageRoute(builder: (context) {
-                  return DiaryWritingPage(
-                      focusedDay:
-                          DateTime.parse(diaryList[index].datetime.toString()));
-                }));
+                pushWithReloadByDiaryWriting(context,
+                    DateTime.parse(diaryList[index].datetime.toString()));
               },
               behavior: HitTestBehavior.opaque,
               child: Container(
-                margin: const EdgeInsets.fromLTRB(10, 10, 10, 0),
-                height: 125,
+                margin: const EdgeInsets.fromLTRB(15, 15, 15, 0),
+                height: 130,
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(15),
@@ -156,8 +212,9 @@ class _DiaryPageState extends ConsumerState<DiaryPage> {
                     ),
                   ),
                   Container(
-                    padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
-                    width: 300,
+                    alignment: Alignment.topLeft,
+                    padding: const EdgeInsets.fromLTRB(35, 0, 35, 0),
+                    // width: 330,
                     child: Text(
                       diaryList[index].content.toString(),
                       overflow: TextOverflow.ellipsis,

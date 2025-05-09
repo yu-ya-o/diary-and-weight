@@ -84,106 +84,115 @@ class _DiaryWritingPageState extends State<DiaryWritingPage> {
     return Scaffold(
         backgroundColor: Colors.white,
         appBar: AppBar(
-            toolbarHeight: 40,
-            backgroundColor: Colors.white,
-            title: Text(
-              '${widget.focusedDay.year}年${widget.focusedDay.month}月${widget.focusedDay.day}日',
-              style: const TextStyle(color: Colors.black54, fontSize: 20),
-            ),
-            // 完了ボタン
-            actions: [
-              if (onFocused)
-                TextButton(
-                    onPressed: () async {
-                      // フォーカスを外す
-                      focusNode.unfocus();
+          toolbarHeight: 40,
+          backgroundColor: Colors.white,
+          title: Text(
+            '${widget.focusedDay.year}年${widget.focusedDay.month}月${widget.focusedDay.day}日',
+            style: const TextStyle(color: Colors.black54, fontSize: 20),
+          ),
+          // 完了ボタン
+          actions: [
+            if (onFocused)
+              TextButton(
+                  onPressed: () async {
+                    // フォーカスを外す
+                    focusNode.unfocus();
 
-                      // 日記を保存
-                      objectBox.addDiary(
-                          writingDate: widget.focusedDay.toString(),
-                          content: content,
-                          datetime: DateTime.parse(widget.focusedDay.toString())
-                              .toUtc());
-                      List<Diary> diaryWeights = objectBox.getDiaryForDateTime(
-                          DateTime(
-                              DateTime.now().year, DateTime.now().month, 1));
-                      if (diaryWeights.length == 10) {
-                        showCupertinoDialog(
-                            context: context,
-                            builder: (BuildContext context) {
-                              return CupertinoAlertDialog(
-                                // title: Text('定期的な使い心地調査にご協力ください'),
-                                content: const Text(
-                                    'いつも日記と体重をご利用いただきありがとうございます。定期的な使い心地調査にご協力お願いいたします。アプリの使い心地はいかがですか？'),
-                                actions: <Widget>[
-                                  TextButton(
-                                    onPressed: () {
-                                      Navigator.pop(context);
-                                      showCupertinoDialog(
-                                          context: context,
-                                          builder: (BuildContext context) {
-                                            return CupertinoAlertDialog(
-                                              content: const Text(
-                                                  '評価ありがとうございます。改善に役立てさせていただきます。不具合、ご意見等ありましたら、「お問い合わせ」よりご連絡お願いいたします。'),
-                                              actions: <Widget>[
-                                                TextButton(
-                                                  onPressed: () {
-                                                    Navigator.pop(context);
-                                                  },
-                                                  child: const Text(
-                                                    '閉じる',
-                                                    style: TextStyle(
-                                                        color: Colors.blue),
-                                                  ),
+                    // 日記を保存
+                    objectBox.addDiary(
+                        writingDate: widget.focusedDay.toString(),
+                        content: content,
+                        datetime: DateTime.parse(widget.focusedDay.toString())
+                            .toUtc());
+                    List<Diary> diaryWeights = objectBox.getDiaryForDateTime(
+                        DateTime(DateTime.now().year, DateTime.now().month, 1));
+                    if (diaryWeights.length == 10) {
+                      showCupertinoDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return CupertinoAlertDialog(
+                              // title: Text('定期的な使い心地調査にご協力ください'),
+                              content: const Text(
+                                  'いつも日記と体重をご利用いただきありがとうございます。定期的な使い心地調査にご協力お願いいたします。アプリの使い心地はいかがですか？'),
+                              actions: <Widget>[
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.pop(context);
+                                    showCupertinoDialog(
+                                        context: context,
+                                        builder: (BuildContext context) {
+                                          return CupertinoAlertDialog(
+                                            content: const Text(
+                                                '評価ありがとうございます。改善に役立てさせていただきます。不具合、ご意見等ありましたら、「お問い合わせ」よりご連絡お願いいたします。'),
+                                            actions: <Widget>[
+                                              TextButton(
+                                                onPressed: () {
+                                                  Navigator.pop(context);
+                                                },
+                                                child: const Text(
+                                                  '閉じる',
+                                                  style: TextStyle(
+                                                      color: Colors.blue),
                                                 ),
-                                              ],
-                                            );
-                                          });
-                                    },
-                                    child: const Text(
-                                      'う〜ん',
-                                      style: TextStyle(color: Colors.blue),
-                                    ),
+                                              ),
+                                            ],
+                                          );
+                                        });
+                                  },
+                                  child: const Text(
+                                    'う〜ん',
+                                    style: TextStyle(color: Colors.blue),
                                   ),
-                                  TextButton(
-                                    onPressed: () async {
-                                      Navigator.pop(context);
-                                      await requestReview();
-                                      sleep(const Duration(seconds: 1));
-                                      showCupertinoDialog(
-                                          context: context,
-                                          builder: (BuildContext context) {
-                                            return CupertinoAlertDialog(
-                                              content: const Text(
-                                                  '評価ありがとうございます。改善に役立てさせていただきます。不具合、ご意見等ありましたら、「お問い合わせ」よりご連絡お願いいたします。'),
-                                              actions: <Widget>[
-                                                TextButton(
-                                                  onPressed: () {
-                                                    Navigator.pop(context);
-                                                  },
-                                                  child: const Text(
-                                                    '閉じる',
-                                                    style: TextStyle(
-                                                        color: Colors.blue),
-                                                  ),
+                                ),
+                                TextButton(
+                                  onPressed: () async {
+                                    Navigator.pop(context);
+                                    await requestReview();
+                                    sleep(const Duration(seconds: 1));
+                                    showCupertinoDialog(
+                                        context: context,
+                                        builder: (BuildContext context) {
+                                          return CupertinoAlertDialog(
+                                            content: const Text(
+                                                '評価ありがとうございます。改善に役立てさせていただきます。不具合、ご意見等ありましたら、「お問い合わせ」よりご連絡お願いいたします。'),
+                                            actions: <Widget>[
+                                              TextButton(
+                                                onPressed: () {
+                                                  Navigator.pop(context);
+                                                },
+                                                child: const Text(
+                                                  '閉じる',
+                                                  style: TextStyle(
+                                                      color: Colors.blue),
                                                 ),
-                                              ],
-                                            );
-                                          });
-                                    },
-                                    child: const Text('いいね！',
-                                        style: TextStyle(color: Colors.blue)),
-                                  ),
-                                ],
-                              );
-                            });
-                      }
-                    },
-                    child: const Text('完了',
-                        style: TextStyle(color: Colors.grey, fontSize: 16)))
-            ],
-            // 戻るボタン
-            iconTheme: const IconThemeData(color: Colors.grey, size: 20)),
+                                              ),
+                                            ],
+                                          );
+                                        });
+                                  },
+                                  child: const Text('いいね！',
+                                      style: TextStyle(color: Colors.blue)),
+                                ),
+                              ],
+                            );
+                          });
+                    }
+                  },
+                  child: const Text('完了',
+                      style: TextStyle(color: Colors.grey, fontSize: 16)))
+          ],
+          // 戻るボタンを「×」にカスタマイズ
+          leading: IconButton(
+            icon: const Icon(
+              Icons.close, // 「×」アイコン
+              color: Colors.grey,
+              size: 20,
+            ),
+            onPressed: () {
+              Navigator.pop(context, true); // 現在の画面を閉じる
+            },
+          ),
+        ),
         // 日記の内容
         body: SingleChildScrollView(
           child: Container(

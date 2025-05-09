@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:disiry_weight_mng/pages/news-letter.dart';
 import 'package:flutter/material.dart';
 import 'package:disiry_weight_mng/main.dart';
 import 'package:flutter/services.dart';
@@ -30,6 +31,15 @@ class _SettingsPageState extends State<SettingsPage> {
     if (await inAppReview.isAvailable()) {
       inAppReview.requestReview();
     }
+  }
+
+  void pushWithReloadBySettingTheme(BuildContext context) async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute<bool>(
+        builder: (BuildContext context) => SelecteThemeColorPage(),
+      ),
+    );
   }
 
   @override
@@ -64,11 +74,8 @@ class _SettingsPageState extends State<SettingsPage> {
           padding: const EdgeInsets.all(10),
           child: Column(children: <Widget>[
             GestureDetector(
-              onTap: () async {
-                await Navigator.of(context)
-                    .push(MaterialPageRoute(builder: (context) {
-                  return const SelecteThemeColorPage();
-                }));
+              onTap: () {
+                pushWithReloadBySettingTheme(context);
               },
               behavior: HitTestBehavior.opaque,
               child: Row(
@@ -152,45 +159,16 @@ class _SettingsPageState extends State<SettingsPage> {
                 ),
               ),
             ),
-            // const Divider(
-            //   color: Color.fromRGBO(238, 238, 238, 1),
-            // ),
-            // GestureDetector(
-            //   onTap: () async {
-            //     await Navigator.of(context)
-            //         .push(MaterialPageRoute(builder: (context) {
-            //       return const PrimeRegisterPage();
-            //     }));
-            //   },
-            //   behavior: HitTestBehavior.opaque,
-            //   child: SizedBox(
-            //     height: 40,
-            //     child: Row(
-            //       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            //       children: [
-            //         Container(
-            //           margin: const EdgeInsets.fromLTRB(10, 0, 0, 0),
-            //           child: const Text(
-            //             'プレミアムサービス',
-            //             style: TextStyle(color: Colors.black54),
-            //           ),
-            //         ),
-            //         Container(
-            //           child: const Icon(
-            //             Icons.chevron_right,
-            //             color: Colors.black38,
-            //           ),
-            //         )
-            //       ],
-            //     ),
-            //   ),
-            // ),
             const Divider(
               color: Color.fromRGBO(238, 238, 238, 1),
             ),
             GestureDetector(
               onTap: () async {
-                await launchUrl(url);
+                await Navigator.of(context).push<void>(
+                  MaterialPageRoute(
+                    builder: (context) => NewsLetterPage(),
+                  ),
+                );
               },
               behavior: HitTestBehavior.opaque,
               child: SizedBox(
@@ -201,7 +179,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     Container(
                       margin: const EdgeInsets.fromLTRB(10, 0, 0, 0),
                       child: const Text(
-                        'お問い合わせ',
+                        '「日記と体重」運営者の日記',
                         style: TextStyle(color: Colors.black54),
                       ),
                     ),
@@ -280,19 +258,9 @@ class _SettingsPageState extends State<SettingsPage> {
                             child: const Text('いいね！',
                                 style: TextStyle(color: Colors.blue)),
                           ),
-                          // TextButton(
-                          //   onPressed: () async {
-                          //     /// OKを押した時の処理
-                          //     Navigator.pop(context);
-                          //     await requestReview();
-                          //   },
-                          //   child: Text('いいね！',
-                          //       style: TextStyle(color: Colors.blue)),
-                          // ),
                         ],
                       );
                     });
-                // await requestReview();
               },
               behavior: HitTestBehavior.opaque,
               child: SizedBox(
@@ -304,6 +272,30 @@ class _SettingsPageState extends State<SettingsPage> {
                       margin: const EdgeInsets.fromLTRB(10, 0, 0, 0),
                       child: const Text(
                         'カンタン評価',
+                        style: TextStyle(color: Colors.black54),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const Divider(
+              color: Color.fromRGBO(238, 238, 238, 1),
+            ),
+            GestureDetector(
+              onTap: () async {
+                await launchUrl(url);
+              },
+              behavior: HitTestBehavior.opaque,
+              child: SizedBox(
+                height: 40,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Container(
+                      margin: const EdgeInsets.fromLTRB(10, 0, 0, 0),
+                      child: const Text(
+                        'お問い合わせ',
                         style: TextStyle(color: Colors.black54),
                       ),
                     ),
@@ -608,14 +600,24 @@ class _SelecteThemeColorPageState extends ConsumerState<SelecteThemeColorPage> {
     return Scaffold(
         backgroundColor: Colors.white,
         appBar: AppBar(
-            toolbarHeight: 40,
-            backgroundColor: Colors.white,
-            title: const Text(
-              'テーマカラー設定',
-              style: TextStyle(color: Colors.black54, fontSize: 18),
+          toolbarHeight: 40,
+          backgroundColor: Colors.white,
+          title: const Text(
+            'テーマカラー設定',
+            style: TextStyle(color: Colors.black54, fontSize: 18),
+          ),
+          // 戻るボタンを「×」にカスタマイズ
+          leading: IconButton(
+            icon: const Icon(
+              Icons.close, // 「×」アイコン
+              color: Colors.grey,
+              size: 20,
             ),
-            // 戻るボタン
-            iconTheme: const IconThemeData(color: Colors.grey, size: 20)),
+            onPressed: () {
+              Navigator.of(context).pop(); // 現在の画面を閉じる
+            },
+          ),
+        ),
         body: SingleChildScrollView(
           child: Container(
               margin: const EdgeInsets.fromLTRB(0, 20, 0, 0),
@@ -627,10 +629,7 @@ class _SelecteThemeColorPageState extends ConsumerState<SelecteThemeColorPage> {
                       ref
                           .read(themeColorProvider.notifier)
                           .updateColor(Colors.lime);
-                      await Navigator.of(context)
-                          .push(MaterialPageRoute(builder: (context) {
-                        return const SettingsPage();
-                      }));
+                      Navigator.pop(context, true);
                     },
                     behavior: HitTestBehavior.opaque,
                     child: SizedBox(
@@ -672,10 +671,7 @@ class _SelecteThemeColorPageState extends ConsumerState<SelecteThemeColorPage> {
                       ref
                           .read(themeColorProvider.notifier)
                           .updateColor(Colors.lime.shade300);
-                      await Navigator.of(context)
-                          .push(MaterialPageRoute(builder: (context) {
-                        return const SettingsPage();
-                      }));
+                      Navigator.pop(context, true);
                     },
                     behavior: HitTestBehavior.opaque,
                     child: SizedBox(
@@ -717,10 +713,7 @@ class _SelecteThemeColorPageState extends ConsumerState<SelecteThemeColorPage> {
                       ref
                           .read(themeColorProvider.notifier)
                           .updateColor(Colors.orange);
-                      await Navigator.of(context)
-                          .push(MaterialPageRoute(builder: (context) {
-                        return const SettingsPage();
-                      }));
+                      Navigator.pop(context, true);
                     },
                     child: SizedBox(
                       height: 60,
@@ -761,10 +754,7 @@ class _SelecteThemeColorPageState extends ConsumerState<SelecteThemeColorPage> {
                       ref
                           .read(themeColorProvider.notifier)
                           .updateColor(Colors.orange.shade300);
-                      await Navigator.of(context)
-                          .push(MaterialPageRoute(builder: (context) {
-                        return const SettingsPage();
-                      }));
+                      Navigator.pop(context, true);
                     },
                     child: SizedBox(
                       height: 60,
@@ -805,10 +795,7 @@ class _SelecteThemeColorPageState extends ConsumerState<SelecteThemeColorPage> {
                       ref
                           .read(themeColorProvider.notifier)
                           .updateColor(Colors.red);
-                      await Navigator.of(context)
-                          .push(MaterialPageRoute(builder: (context) {
-                        return const SettingsPage();
-                      }));
+                      Navigator.pop(context, true);
                     },
                     child: SizedBox(
                       height: 60,
@@ -849,10 +836,7 @@ class _SelecteThemeColorPageState extends ConsumerState<SelecteThemeColorPage> {
                       ref
                           .read(themeColorProvider.notifier)
                           .updateColor(Colors.red.shade300);
-                      await Navigator.of(context)
-                          .push(MaterialPageRoute(builder: (context) {
-                        return const SettingsPage();
-                      }));
+                      Navigator.pop(context, true);
                     },
                     child: SizedBox(
                       height: 60,
@@ -892,10 +876,7 @@ class _SelecteThemeColorPageState extends ConsumerState<SelecteThemeColorPage> {
                       ref
                           .read(themeColorProvider.notifier)
                           .updateColor(Colors.purple);
-                      await Navigator.of(context)
-                          .push(MaterialPageRoute(builder: (context) {
-                        return const SettingsPage();
-                      }));
+                      Navigator.pop(context, true);
                     },
                     child: SizedBox(
                       height: 60,
@@ -936,10 +917,7 @@ class _SelecteThemeColorPageState extends ConsumerState<SelecteThemeColorPage> {
                       ref
                           .read(themeColorProvider.notifier)
                           .updateColor(Colors.purple.shade300);
-                      await Navigator.of(context)
-                          .push(MaterialPageRoute(builder: (context) {
-                        return const SettingsPage();
-                      }));
+                      Navigator.pop(context, true);
                     },
                     child: SizedBox(
                       height: 60,
@@ -980,10 +958,7 @@ class _SelecteThemeColorPageState extends ConsumerState<SelecteThemeColorPage> {
                       ref
                           .read(themeColorProvider.notifier)
                           .updateColor(Colors.green);
-                      await Navigator.of(context)
-                          .push(MaterialPageRoute(builder: (context) {
-                        return const SettingsPage();
-                      }));
+                      Navigator.pop(context, true);
                     },
                     child: SizedBox(
                       height: 60,
@@ -1024,10 +999,7 @@ class _SelecteThemeColorPageState extends ConsumerState<SelecteThemeColorPage> {
                       ref
                           .read(themeColorProvider.notifier)
                           .updateColor(Colors.green.shade300);
-                      await Navigator.of(context)
-                          .push(MaterialPageRoute(builder: (context) {
-                        return const SettingsPage();
-                      }));
+                      Navigator.pop(context, true);
                     },
                     child: SizedBox(
                       height: 60,
@@ -1068,10 +1040,7 @@ class _SelecteThemeColorPageState extends ConsumerState<SelecteThemeColorPage> {
                       ref
                           .read(themeColorProvider.notifier)
                           .updateColor(Colors.blue);
-                      await Navigator.of(context)
-                          .push(MaterialPageRoute(builder: (context) {
-                        return const SettingsPage();
-                      }));
+                      Navigator.pop(context, true);
                     },
                     child: SizedBox(
                       height: 60,
@@ -1112,10 +1081,7 @@ class _SelecteThemeColorPageState extends ConsumerState<SelecteThemeColorPage> {
                       ref
                           .read(themeColorProvider.notifier)
                           .updateColor(Colors.blue.shade300);
-                      await Navigator.of(context)
-                          .push(MaterialPageRoute(builder: (context) {
-                        return const SettingsPage();
-                      }));
+                      Navigator.pop(context, true);
                     },
                     child: SizedBox(
                       height: 60,

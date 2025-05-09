@@ -19,7 +19,6 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_native_timezone/flutter_native_timezone.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest.dart' as tz;
-import 'package:flutter_svg/svg.dart';
 
 class CalendarPage extends ConsumerStatefulWidget {
   const CalendarPage({super.key});
@@ -62,15 +61,34 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
 
     int noticeDays = 14;
 
+    String title = '日記と体重';
+
     for (int i = 0; i < noticeDays; i++) {
+      String message = 'お疲れ様です！今日もちょこっとだけ日記と体重を記録しませんか？';
       // Setting Notifications
       if (i != 0) {
         scheduledTime = scheduledTime.add(const Duration(days: 1));
       }
+      if (i == 0) {
+        if (weightList.isNotEmpty) {
+          // 既に入力済みであればスキップ
+          continue;
+        }
+
+        if (countConsecutiveDates != 0) {
+          // 継続中であれば今日の通知メッセージを変更
+          message = '体重測定、$countConsecutiveDates日連続継続中！今日も日記と体重を記録しませんか？';
+        }
+      } else if (i == 1) {
+        if (weightList.isNotEmpty) {
+          // 継続中かつ今日の体重が入力済みであれば明日の通知メッセージを変更
+          message = '体重測定、$countConsecutiveDates日連続継続中！今日も日記と体重を記録しませんか？';
+        }
+      }
       flutterLocalNotificationsPlugin.zonedSchedule(
         i,
-        '日記と体重',
-        'お疲れ様です！今日もちょこっとだけ日記と体重を記録をしませんか？',
+        title,
+        message,
         scheduledTime,
         const NotificationDetails(
           iOS: DarwinNotificationDetails(),
@@ -87,107 +105,9 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
   }
 
   // 日記なしメッセージ
-  final String unWritingDiary = 'どんな一日でしたか？\n１行だけでも書いてみましょう';
-
-  String randomMorningMessage = '';
-
-  final List<String> scrollMorningMessages = [
-    'おはようございます。暖かくしてお出かけしましょうね！通知設定をONにして記入忘れを防ぎましょう！',
-    'Good Morning! 良い一日になりますように！通知設定をONにして記入忘れを防ぎましょう！',
-    'Mucho gusto! スペイン語の"はじめまして"です。通知設定をONにして記入忘れを防ぎましょう！',
-    'おはようございます。今日は何をしたいですか？通知設定をONにして記入忘れを防ぎましょう！',
-    // '食欲の秋、読書の秋、スポーツの秋！たのしい季節ですね！'
-  ];
-
-  String getScrollMorningMessage() {
-    final random = Random();
-    final index = random.nextInt(scrollMorningMessages.length);
-    return randomMorningMessage = scrollMorningMessages[index];
-  }
-
-  String randomDayMessage = '';
-
-  final List<String> scrollDayMessages = [
-    '年末はなんだか寂しい気持ちになることありますよね。設定でアプリの色を変更することができます。気分転換にどうですか？',
-    'こんにちは。マイペースにやっていきましょうね！通知設定をONにして記入忘れを防ぎましょう！',
-    'こんにちは。疲れたときは甘いもの食べて休憩しましょう。通知設定をONにして記入忘れを防ぎましょう！',
-    // '食欲の秋、読書の秋、スポーツの秋！たのしい季節ですね！'
-  ];
-
-  String getScrollDayMessage() {
-    final random = Random();
-    final index = random.nextInt(scrollDayMessages.length);
-    return randomDayMessage = scrollDayMessages[index];
-  }
-
-  String randomNightMessage = '';
-
-  final List<String> scrollNightMessages = [
-    '今年もあと少しですね。どんな一年でしたか？まだまだ楽しい思い出たくさんつくっていきましょうね！',
-    'Mucho gusto! スペイン語の”はじめまして”です。通知設定をONにして記入忘れを防ぎましょう！',
-    'こんばんは！寒くなってきたので、暖かくして過ごしましょうね。通知設定をONにして記入忘れを防ぎましょう！',
-    '年末はなんだか寂しい気持ちになることありますよね。設定でアプリの色を変更することができます。気分転換にどうですか？'
-  ];
-
-  String getScrollNightMessage() {
-    final random = Random();
-    final index = random.nextInt(scrollNightMessages.length);
-    return randomNightMessage = scrollNightMessages[index];
-  }
-
-  String randomMamechishiki = '';
-
-  final List<String> scrollMamechishiki = [
-    '「バナナはベリーの一種」\n実は、植物学的に言うとバナナはベリーに分類されます。一方で、イチゴはベリーではありません！',
-    '「コアラの指紋は人間とそっくり」\nコアラの指紋は非常に人間のものに似ていて、指紋鑑定でも区別がつかないほどです。',
-    '「タコには心臓が3つある」\nタコの体には3つの心臓があり、そのうち1つは酸素を体全体に送り、残りの2つはエラに血液を送ります。',
-    '「チョコレートは宇宙食として承認されている」\nNASAの宇宙飛行士たちが宇宙で食べることができる食品リストにはチョコレートが含まれています。',
-    '「イルカは名前でお互いを呼び合う」\nイルカは独自の「笛」の音でお互いを識別し、それが名前のような役割を果たしています。',
-    '「雷は火よりも熱い」\n雷の温度は約30,000度で、これは太陽の表面温度の約5倍に相当します。',
-    '「ハチは紫外線を見ることができる」\n人間には見えない紫外線を見ることができ、これを使って花を見つけます。',
-    '「きゅうりの水分量は約95％」\nきゅうりのほとんどは水でできており、暑い日には水分補給に役立ちます。',
-    '「カメレオンの舌は体長の2倍の長さ」\nカメレオンの舌は体の2倍以上の長さがあり、獲物を捕まえるのに使われます。',
-    '「人間の鼻は5万種類以上の匂いを覚えられる」\n鼻は驚くべき能力を持ち、複雑な匂いをかぎ分けて記憶することができます。',
-    '「イギリスのビッグ・ベン」\nよく「時計台」そのものを指すと思われがちですが、ビッグ・ベンという名前は中にある巨大な鐘を指しています。',
-    '「アメリカの名前の由来」\nアメリカの名前は、イタリアの探検家アメリゴ・ヴェスプッチ（Amerigo Vespucci）にちなんでいます。',
-    '「ナマケモノのトイレ」\nナマケモノは代謝が非常に遅いため、トイレに行くのは1週間に1回程度です。',
-    '「カバの汗」\nカバは日焼け止めや乾燥を防ぐ役割を持つ特殊な汗をかき、この汗は赤い色に見えます。',
-    '「ノーベル賞は非課税」\n日本の所得税法では、ノーベル基金から支払われる賞金約1億5000万円は非課税とすると規定されています。',
-    '「ホットドッグ世界王者の出禁」\n2024年、アメリカのホットドッグ早食い世界王者が、代替肉メーカーとスポンサー契約を結んだことを理由に大会を出禁になりました。',
-    '「日本のジョー・バイデン」\n熊本県山都町の梅田穣（うめだじょう）元町長の名前は、音読みをするとアメリカ大統領ジョー・バイデンと同じ読みになります。',
-    '「ニモはカクレクマノミではない」\nニモのモデルは、イースタンクラウンアネモネフィッシュという、オーストラリアに生息する魚です。',
-    '「通知機能を設定しよう」\n通知機能はオンになっていますか？iPhoneの「設定>アプリ>日記と体重」から設定できます。記録忘れを防ぎましょう！',
-    '「カラーを変更してみよう」\n設定からアプリカラーを変更できます。気分転換に変えてみませんか？全12色から選択できます！',
-    '「車のエンジンルームに猫、気をつけて」\n JAFによると1月と6月に猫トラブルが増えます。1月は寒さ、6月は繁殖期が原因のようです。出発前に猫チェックを心がけましょう！',
-    '「中国では口パクが禁止されている」\n中国では歌手が録音テープに合わせて実際に歌っているように見せる行為を聴衆を欺く行為として処罰対象としています。',
-    '「4分33秒」\nアメリカの作曲家ジョン・ケージの代表作。演奏時間4分33秒の間、演奏者は一切演奏をせず、聴衆は沈黙という音を楽しみます。',
-    '「テンポ速すぎ・遅すぎ音楽禁止」\nチェチェン共和国では国の伝統音楽を守るために、全ての音楽作品は1分間に80~116拍のテンポにテンポに収まるように義務付けています。'
-  ];
-
-  String getScrollMamechishiki() {
-    final random = Random();
-    final index = random.nextInt(scrollMamechishiki.length);
-    return randomMamechishiki = scrollMamechishiki[index];
-  }
+  final String unWritingDiary = 'どんな一日でしたか？\n１行だけでも書いてみましょう！\nここをタップ';
 
   String randomPicto = '';
-
-  final List<String> pictos = [
-    'assets/pictogram1.svg',
-    'assets/pictogram2.svg',
-    'assets/pictogram3.svg',
-    'assets/pictogram4.svg'
-  ];
-
-  String getPicto() {
-    final random = Random();
-    final index = random.nextInt(pictos.length);
-    return randomPicto = pictos[index];
-  }
-
-  // スクロールメッセージ
-  String scrollMessage = '';
-  int nowHour = DateTime.now().hour;
 
   // カレンダーが表示される日付
   DateTime _focusedDay = DateTime.parse(
@@ -237,14 +157,44 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
   // 目標体重まで
   double untilTarget = 0.0;
 
+  // 初期テーマカラー
   Color themeColor = Colors.blue;
+
+  // 継続日数
+  int countConsecutiveDates = 0;
+
+  // リロード
+  void pushWithReloadByDiaryWriting(BuildContext context) async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute<bool>(
+        builder: (BuildContext context) => DiaryWritingPage(
+            focusedDay: DateTime.parse(_focusedDay.toString())),
+      ),
+    );
+
+    if (result == true) {
+      setState(() {
+        if (diaryList.isNotEmpty) {
+          // 今日の日記が存在する場合
+          todayDiary = diaryList.first.content.toString();
+        } else {
+          // 今日の日記が存在しない場合、メッセージ表示
+          todayDiary = unWritingDiary;
+        }
+        if (todayDiary.isEmpty) {
+          // 今日の日記が存在しない場合、メッセージ表示
+          todayDiary = unWritingDiary;
+        }
+      });
+    }
+  }
 
   @override
   void initState() {
     super.initState();
-    // 通知追加
-    tz.initializeTimeZones();
-    _initializeAndScheduleNotifications();
+    // 継続日数取得
+    countConsecutiveDates = objectBox.countConsecutiveDates();
     // 今日の体重取得
     weightList = objectBox.getWeight(selectedDay: _focusedDay.toString());
     // 今日の日記取得
@@ -294,6 +244,10 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
       // 今日の日記が存在しない場合、メッセージ表示
       todayDiary = unWritingDiary;
     }
+
+    // 通知追加
+    tz.initializeTimeZones();
+    _initializeAndScheduleNotifications();
   }
 
   @override
@@ -339,24 +293,6 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
       averageWeight = sumWeight / weightsData.length;
     } else {
       averageWeight = 0.0;
-    }
-
-    // スクロールメッセージ
-    int nowHour = DateTime.now().hour;
-    if (nowHour >= 4 && nowHour <= 10) {
-      // scrollMessage = getScrollMorningMessage();
-      scrollMessage = getScrollMamechishiki();
-    } else if (nowHour >= 11 && nowHour <= 17) {
-      // scrollMessage = getScrollDayMessage();
-      scrollMessage = getScrollMamechishiki();
-    } else if (nowHour >= 18 && nowHour <= 24) {
-      // scrollMessage = getScrollNightMessage();
-      scrollMessage = getScrollMamechishiki();
-    } else if (nowHour <= 3) {
-      // scrollMessage = getScrollNightMessage();
-      scrollMessage = getScrollMamechishiki();
-    } else {
-      scrollMessage = 'こんにちは。良い日になりますように。';
     }
 
     // 目標体重取得
@@ -431,10 +367,26 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
     } else if (themeColorString == 'blue-shade') {
       themeColor = Colors.blue.shade300;
     }
+
     return Scaffold(
       appBar: AppBar(
-        toolbarHeight: 0,
+        toolbarHeight: 20, // 高さを少し調整
         backgroundColor: Colors.white,
+        title: Align(
+            alignment: Alignment.centerLeft, // 左寄せ
+            child: Row(
+              children: [
+                Icon(
+                  Icons.tips_and_updates_outlined,
+                  color: themeColor,
+                ),
+                const Padding(padding: EdgeInsets.only(right: 5)),
+                Text(
+                  '$countConsecutiveDates日連続継続中',
+                  style: const TextStyle(color: Colors.black54, fontSize: 15),
+                ),
+              ],
+            )),
       ),
       backgroundColor: Colors.white,
       body: SingleChildScrollView(
@@ -503,14 +455,14 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
                         ),
                       ),
                       Text(
-                        '${day.year}年${day.month}月',
+                        '${day.month}月',
                         style: const TextStyle(
                             color: Colors.black54, fontSize: 18),
                       ),
                       if (day.month == 12)
-                        Text(
+                        const Text(
                           '🎅🎄',
-                          style: const TextStyle(fontSize: 22),
+                          style: TextStyle(fontSize: 22),
                         ),
                     ])
                   ],
@@ -523,14 +475,17 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
                 final dowText = DateFormat.E('ja').format(day);
                 return Container(
                   decoration: BoxDecoration(
-                    // color: Color.fromARGB(255, 221, 206, 197),
-                    color: themeColor.withOpacity(0.4),
-                  ),
+                      // color: Colors.white,
+                      color: themeColor.withOpacity(0.3),
+                      border: Border.all(
+                        color: const Color.fromARGB(255, 230, 223, 223),
+                        width: 0.5,
+                      )),
                   alignment: Alignment.topCenter,
                   child: Center(
                     child: Text(
                       dowText.toString(),
-                      style: const TextStyle(color: Colors.black54),
+                      style: const TextStyle(color: Colors.black26),
                     ),
                   ),
                 );
@@ -727,41 +682,12 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
         Container(
           height: 25,
           alignment: Alignment.topLeft,
-          padding: const EdgeInsets.fromLTRB(5, 2, 0, 2),
+          padding: const EdgeInsets.fromLTRB(10, 2, 0, 2),
           // color: const Color.fromARGB(255, 221, 206, 197),
-          color: themeColor.withOpacity(0.4),
+          color: themeColor.withOpacity(0.3),
           child: Text(
             '${_focusedDay.year}年${_focusedDay.month}月${_focusedDay.day}日',
-            style: const TextStyle(color: Colors.black54, fontSize: 15),
-          ),
-        ),
-        Container(
-          decoration: const BoxDecoration(
-            color: Color(0xFFF5F5F5),
-          ),
-          child: Container(
-            margin: const EdgeInsets.fromLTRB(20, 20, 20, 0),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start, // 縦方向の揃え方
-              children: [
-                Container(
-                  child: SvgPicture.asset(
-                    getPicto(),
-                    width: 50,
-                    height: 50,
-                  ),
-                ),
-                const SizedBox(width: 10), // アイコンとテキストの間にスペースを追加
-                Expanded(
-                  child: Text(
-                    scrollMessage,
-                    style: const TextStyle(fontSize: 13), // テキストスタイルを設定（任意）
-                    softWrap: true, // 折り返しを有効にする
-                    overflow: TextOverflow.clip, // テキストがあふれないように設定
-                  ),
-                ),
-              ],
-            ),
+            style: const TextStyle(color: Colors.black26, fontSize: 15),
           ),
         ),
         Container(
@@ -790,7 +716,11 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
                     await DialogUtils.showEditingDialog(
                         context, todayWeight, _focusedDay);
                     setState(() {
+                      // 継続日数を取得
+                      countConsecutiveDates = objectBox.countConsecutiveDates();
+                      // 全ての体重を取得
                       allWeightList = objectBox.getAllWeight();
+                      // 今日の体重を取得
                       weightList = objectBox.getWeight(
                           selectedDay: _focusedDay.toString());
                       if (weightList.isNotEmpty) {
@@ -809,18 +739,21 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
                             (targetWeight - double.parse(todayWeight))
                                 .toStringAsFixed(2));
                       }
+                      // 通知追加
+                      tz.initializeTimeZones();
+                      _initializeAndScheduleNotifications();
                     });
                   },
                   behavior: HitTestBehavior.opaque,
                   child: Container(
-                    padding: const EdgeInsets.all(10),
+                    padding: const EdgeInsets.fromLTRB(10, 10, 0, 0),
                     child: Column(
                       children: [
                         Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
                           children: [
                             Container(
-                              padding: const EdgeInsets.fromLTRB(20, 15, 0, 0),
+                              padding: const EdgeInsets.fromLTRB(20, 0, 0, 0),
                               child: Column(
                                 children: [
                                   const Text(
@@ -848,7 +781,7 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
                                       alignment: Alignment.center,
                                       decoration: BoxDecoration(
                                         borderRadius: BorderRadius.circular(5),
-                                        color: themeColor.withOpacity(0.7),
+                                        color: themeColor.withOpacity(0.4),
                                       ),
                                       child: const Text(
                                         'BMI',
@@ -863,7 +796,7 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
                                       alignment: Alignment.center,
                                       decoration: BoxDecoration(
                                         borderRadius: BorderRadius.circular(5),
-                                        color: themeColor.withOpacity(0.7),
+                                        color: themeColor.withOpacity(0.4),
                                       ),
                                       child: const Text(
                                         '目標まで',
@@ -897,30 +830,27 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
                                 ],
                               ),
                             ),
-                            const Icon(
-                              Icons.chevron_right,
-                              color: Colors.black38,
-                            )
+                            Container(
+                                alignment: Alignment.centerRight,
+                                child: const Icon(
+                                  Icons.chevron_right,
+                                  color: Colors.black38,
+                                ))
                           ],
                         ),
                       ],
                     ),
                   ),
                 ),
-                Container(
-                    child: const Divider(
+                const Divider(
                   indent: 10,
                   endIndent: 10,
                   thickness: 0.5,
                   color: Color.fromRGBO(238, 238, 238, 1),
-                )),
+                ),
                 GestureDetector(
                   onTap: () async {
-                    await Navigator.of(context)
-                        .push(MaterialPageRoute(builder: (context) {
-                      return DiaryWritingPage(
-                          focusedDay: DateTime.parse(_focusedDay.toString()));
-                    }));
+                    pushWithReloadByDiaryWriting(context);
                     setState(() {
                       diaryList = objectBox.getDiary(
                           selectedDay: _focusedDay.toString());
@@ -931,13 +861,13 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
                   },
                   behavior: HitTestBehavior.opaque,
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
                       Expanded(
                         flex: 7,
                         child: Container(
                           height: 100,
-                          padding: const EdgeInsets.all(10),
+                          padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
                           margin: const EdgeInsets.fromLTRB(10, 0, 0, 0),
                           child: Text(
                             todayDiary,
@@ -950,13 +880,6 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
                           ),
                         ),
                       ),
-                      const Expanded(
-                        flex: 1,
-                        child: Icon(
-                          Icons.chevron_right,
-                          color: Colors.black38,
-                        ),
-                      )
                     ],
                   ),
                 ),
@@ -989,63 +912,48 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
                     Container(),
                     Column(
                       children: [
-                        Container(
-                          child: Text(
-                            '今月の平均',
-                            style: const TextStyle(
-                                fontSize: 11, color: Colors.black54),
-                          ),
+                        const Text(
+                          '今月の平均',
+                          style: TextStyle(fontSize: 11, color: Colors.black54),
                         ),
-                        Container(
-                          child: Text(
-                            '${averageWeight.toStringAsFixed(2)}kg',
-                            style: const TextStyle(
-                                fontSize: 13, color: Colors.black54),
-                          ),
+                        Text(
+                          '${averageWeight.toStringAsFixed(2)}kg',
+                          style: const TextStyle(
+                              fontSize: 13, color: Colors.black54),
                         )
                       ],
                     ),
-                    Container(
+                    const SizedBox(
                         height: 20,
-                        child: const VerticalDivider(
+                        child: VerticalDivider(
                             thickness: 0.5, color: Colors.grey)),
                     Column(
                       children: [
-                        Container(
-                          child: Text(
-                            '先月の体重',
-                            style: const TextStyle(
-                                fontSize: 11, color: Colors.black54),
-                          ),
+                        const Text(
+                          '先月の体重',
+                          style: TextStyle(fontSize: 11, color: Colors.black54),
                         ),
-                        Container(
-                          child: Text(
-                            '${lastMonthWeight}kg',
-                            style: const TextStyle(
-                                fontSize: 13, color: Colors.black54),
-                          ),
+                        Text(
+                          '${lastMonthWeight}kg',
+                          style: const TextStyle(
+                              fontSize: 13, color: Colors.black54),
                         )
                       ],
                     ),
-                    Container(
+                    const SizedBox(
                         height: 20,
-                        child: const VerticalDivider(
+                        child: VerticalDivider(
                             thickness: 0.5, color: Colors.grey)),
                     Column(
                       children: [
-                        Container(
-                          child: Text(
-                            '去年の体重',
-                            style: const TextStyle(
-                                fontSize: 11, color: Colors.black54),
-                          ),
+                        const Text(
+                          '去年の体重',
+                          style: TextStyle(fontSize: 11, color: Colors.black54),
                         ),
-                        Container(
-                          child: Text(
-                            '${lastYearWeight}kg',
-                            style: const TextStyle(
-                                fontSize: 13, color: Colors.black54),
-                          ),
+                        Text(
+                          '${lastYearWeight}kg',
+                          style: const TextStyle(
+                              fontSize: 13, color: Colors.black54),
                         )
                       ],
                     ),
@@ -1155,7 +1063,11 @@ class _TextEditingDialogState extends ConsumerState<TextEditingDialog> {
   void initState() {
     super.initState();
     // TextFormFieldに初期値を代入する
-    controller.text = widget.weight;
+    if (widget.weight == '00.0') {
+      controller.text = '';
+    } else {
+      controller.text = widget.weight;
+    }
     focusNode.addListener(
       () {
         // フォーカスが当たったときに文字列が選択された状態にする
@@ -1246,7 +1158,7 @@ class _TextEditingDialogState extends ConsumerState<TextEditingDialog> {
                     DateTime(DateTime.now().year, DateTime.now().month, 1)
                         .toString()));
             Navigator.of(context).pop(controller.text);
-            if (monthWeights.length == 2) {
+            if (monthWeights.length == 3) {
               showCupertinoDialog(
                   context: context,
                   builder: (BuildContext context) {
