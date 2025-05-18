@@ -14,6 +14,7 @@ import 'package:objectbox/internal.dart'; // generated code can access "internal
 import 'package:objectbox/objectbox.dart';
 import 'package:objectbox_flutter_libs/objectbox_flutter_libs.dart';
 
+import 'entity/bodyFatRate.dart';
 import 'entity/diary.dart';
 import 'entity/setting.dart';
 import 'entity/weight.dart';
@@ -105,6 +106,36 @@ final _entities = <ModelEntity>[
             flags: 0)
       ],
       relations: <ModelRelation>[],
+      backlinks: <ModelBacklink>[]),
+  ModelEntity(
+      id: const IdUid(7, 6108805686002585785),
+      name: 'BodyFatRate',
+      lastPropertyId: const IdUid(4, 1564595409075203918),
+      flags: 0,
+      properties: <ModelProperty>[
+        ModelProperty(
+            id: const IdUid(1, 7152374688569349084),
+            name: 'id',
+            type: 6,
+            flags: 1),
+        ModelProperty(
+            id: const IdUid(2, 5112455989906037065),
+            name: 'date',
+            type: 9,
+            flags: 34848,
+            indexId: const IdUid(8, 2964199201847588595)),
+        ModelProperty(
+            id: const IdUid(3, 5560540512127631853),
+            name: 'bodyFatRate',
+            type: 8,
+            flags: 0),
+        ModelProperty(
+            id: const IdUid(4, 1564595409075203918),
+            name: 'datetime',
+            type: 10,
+            flags: 0)
+      ],
+      relations: <ModelRelation>[],
       backlinks: <ModelBacklink>[])
 ];
 
@@ -128,8 +159,8 @@ Future<Store> openStore(
 ModelDefinition getObjectBoxModel() {
   final model = ModelInfo(
       entities: _entities,
-      lastEntityId: const IdUid(6, 7823824433616586941),
-      lastIndexId: const IdUid(7, 5308752989585021852),
+      lastEntityId: const IdUid(7, 6108805686002585785),
+      lastIndexId: const IdUid(8, 2964199201847588595),
       lastRelationId: const IdUid(0, 0),
       lastSequenceId: const IdUid(0, 0),
       retiredEntityUids: const [
@@ -249,6 +280,39 @@ ModelDefinition getObjectBoxModel() {
             ..id = const fb.Int64Reader().vTableGet(buffer, rootOffset, 4, 0);
 
           return object;
+        }),
+    BodyFatRate: EntityDefinition<BodyFatRate>(
+        model: _entities[3],
+        toOneRelations: (BodyFatRate object) => [],
+        toManyRelations: (BodyFatRate object) => {},
+        getId: (BodyFatRate object) => object.id,
+        setId: (BodyFatRate object, int id) {
+          object.id = id;
+        },
+        objectToFB: (BodyFatRate object, fb.Builder fbb) {
+          final dateOffset = fbb.writeString(object.date);
+          fbb.startTable(5);
+          fbb.addInt64(0, object.id);
+          fbb.addOffset(1, dateOffset);
+          fbb.addFloat64(2, object.bodyFatRate);
+          fbb.addInt64(3, object.datetime.millisecondsSinceEpoch);
+          fbb.finish(fbb.endTable());
+          return object.id;
+        },
+        objectFromFB: (Store store, ByteData fbData) {
+          final buffer = fb.BufferContext(fbData);
+          final rootOffset = buffer.derefObject(0);
+
+          final object = BodyFatRate(
+              date: const fb.StringReader(asciiOptimization: true)
+                  .vTableGet(buffer, rootOffset, 6, ''),
+              bodyFatRate:
+                  const fb.Float64Reader().vTableGet(buffer, rootOffset, 8, 0),
+              datetime: DateTime.fromMillisecondsSinceEpoch(
+                  const fb.Int64Reader().vTableGet(buffer, rootOffset, 10, 0)))
+            ..id = const fb.Int64Reader().vTableGet(buffer, rootOffset, 4, 0);
+
+          return object;
         })
   };
 
@@ -300,4 +364,23 @@ class Setting_ {
   /// see [Setting.ruleVal]
   static final ruleVal =
       QueryStringProperty<Setting>(_entities[2].properties[2]);
+}
+
+/// [BodyFatRate] entity fields to define ObjectBox queries.
+class BodyFatRate_ {
+  /// see [BodyFatRate.id]
+  static final id =
+      QueryIntegerProperty<BodyFatRate>(_entities[3].properties[0]);
+
+  /// see [BodyFatRate.date]
+  static final date =
+      QueryStringProperty<BodyFatRate>(_entities[3].properties[1]);
+
+  /// see [BodyFatRate.bodyFatRate]
+  static final bodyFatRate =
+      QueryDoubleProperty<BodyFatRate>(_entities[3].properties[2]);
+
+  /// see [BodyFatRate.datetime]
+  static final datetime =
+      QueryIntegerProperty<BodyFatRate>(_entities[3].properties[3]);
 }

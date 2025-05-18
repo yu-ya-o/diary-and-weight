@@ -1,7 +1,9 @@
 import 'dart:io';
 
+import 'package:disiry_weight_mng/entity/bodyFatRate.dart';
 import 'package:disiry_weight_mng/main.dart';
 import 'package:disiry_weight_mng/pages/diary-writing-page.dart';
+import 'package:disiry_weight_mng/pages/weight-writing-page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
@@ -105,9 +107,8 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
   }
 
   // 日記なしメッセージ
-  final String unWritingDiary = 'どんな一日でしたか？\n１行だけでも書いてみましょう！\nここをタップ';
-
-  String randomPicto = '';
+  // final String unWritingDiary = 'どんな一日でしたか？\n１行だけでも書いてみましょう！\nここをタップ';
+  final String unWritingDiary = '今日は何した？何食べた？';
 
   // カレンダーが表示される日付
   DateTime _focusedDay = DateTime.parse(
@@ -133,29 +134,32 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
   String todayWeight = '';
   // 先月の体重
   List<Weight> lastMonthWeightList = List.empty();
-  String lastMonthWeight = '0.00';
+  String lastMonthWeight = '00.00';
   // 去年の体重
   List<Weight> lastYearWeightList = List.empty();
-  String lastYearWeight = '0.00';
+  String lastYearWeight = '00.00';
   // 全体重
   List<Weight> allWeightList = List.empty();
+  // 選択日の体脂肪率
+  List<BodyFatRate> bodyFatRateList = List.empty();
+  String todayBodyFatRate = '';
   // 選択日の日記
   List<Diary> diaryList = List.empty();
   String todayDiary = '';
 
   // 平均体重表示用
   List<Weight> weightsData = [];
-  double averageWeight = 0.0;
-  double sumWeight = 0.0;
+  double averageWeight = 00.00;
+  double sumWeight = 00.00;
 
   // 身長
-  double myHeight = 0.0;
+  double myHeight = 00.00;
   // BMI
-  double bmi = 0.0;
+  double bmi = 00.00;
   // 目標体重
-  double targetWeight = 0.0;
+  double targetWeight = 00.00;
   // 目標体重まで
-  double untilTarget = 0.0;
+  double untilTarget = 00.00;
 
   // 初期テーマカラー
   Color themeColor = Colors.blue;
@@ -164,17 +168,58 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
   int countConsecutiveDates = 0;
 
   // リロード
-  void pushWithReloadByDiaryWriting(BuildContext context) async {
+  void pushWithReloadByWeightWriting(
+      BuildContext context, String weight, String bodyFatRate) async {
     final result = await Navigator.push(
       context,
       MaterialPageRoute<bool>(
-        builder: (BuildContext context) => DiaryWritingPage(
+        builder: (BuildContext context) => WeightWritingPage(
+            weight: weight,
+            bodyFatRate: bodyFatRate,
             focusedDay: DateTime.parse(_focusedDay.toString())),
       ),
     );
 
     if (result == true) {
       setState(() {
+        if (weightList.isNotEmpty) {
+          // 今日の体重が存在する場合
+          todayWeight = weightList.first.weight.toStringAsFixed(2);
+          if (todayWeight.isNotEmpty && todayWeight != '00.00') {
+            // 00.00kgではない場合
+            bmi = myHeight == 0
+                ? 00.00
+                : double.parse(todayWeight) /
+                    ((myHeight / 100) * (myHeight / 100));
+            bmi = double.parse(bmi.toStringAsFixed(1));
+            untilTarget = double.parse(
+                (targetWeight - double.parse(todayWeight)).toStringAsFixed(2));
+          } else {
+            // 00.00kgの場合
+            todayWeight = '00.00';
+            bmi = 00.00;
+            untilTarget = 00.00;
+          }
+        } else {
+          // 今日の体重が存在しない場合
+          todayWeight = '00.00';
+          bmi = 00.00;
+          untilTarget = 00.00;
+        }
+
+        if (bodyFatRateList.isNotEmpty) {
+          // 今日の体脂肪率が存在する場合
+          todayBodyFatRate =
+              bodyFatRateList.first.bodyFatRate.toStringAsFixed(2);
+          if (todayBodyFatRate.isNotEmpty && todayBodyFatRate == '00.00') {
+            // 00.00%の場合
+            todayBodyFatRate = '00.00';
+          }
+        } else {
+          // 今日の体重が存在しない場合
+          todayBodyFatRate = '00.00';
+        }
+
         if (diaryList.isNotEmpty) {
           // 今日の日記が存在する場合
           todayDiary = diaryList.first.content.toString();
@@ -197,6 +242,9 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
     countConsecutiveDates = objectBox.countConsecutiveDates();
     // 今日の体重取得
     weightList = objectBox.getWeight(selectedDay: _focusedDay.toString());
+    // 今日の体脂肪率取得
+    bodyFatRateList =
+        objectBox.getBodyFatRate(selectedDay: _focusedDay.toString());
     // 今日の日記取得
     diaryList = objectBox.getDiary(selectedDay: _focusedDay.toString());
     // 毎日の体重取得（カレンダー表示用）
@@ -212,25 +260,37 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
     if (weightList.isNotEmpty) {
       // 今日の体重が存在する場合
       todayWeight = weightList.first.weight.toStringAsFixed(2);
-      if (todayWeight.isNotEmpty && todayWeight != '00.0') {
+      if (todayWeight.isNotEmpty && todayWeight != '00.00') {
         // 00.00kgではない場合
         bmi = myHeight == 0
-            ? 0.0
+            ? 00.00
             : double.parse(todayWeight) / ((myHeight / 100) * (myHeight / 100));
         bmi = double.parse(bmi.toStringAsFixed(1));
         untilTarget = double.parse(
             (targetWeight - double.parse(todayWeight)).toStringAsFixed(2));
       } else {
         // 00.00kgの場合
-        todayWeight = '00.0';
-        bmi = 0.0;
-        untilTarget = 0.0;
+        todayWeight = '00.00';
+        bmi = 00.00;
+        untilTarget = 00.00;
       }
     } else {
       // 今日の体重が存在しない場合
-      todayWeight = '00.0';
-      bmi = 0.0;
-      untilTarget = 0.0;
+      todayWeight = '00.00';
+      bmi = 00.00;
+      untilTarget = 00.00;
+    }
+
+    if (bodyFatRateList.isNotEmpty) {
+      // 今日の体脂肪率が存在する場合
+      todayBodyFatRate = bodyFatRateList.first.bodyFatRate.toStringAsFixed(2);
+      if (todayBodyFatRate.isNotEmpty && todayBodyFatRate == '00.00') {
+        // 00.00%の場合
+        todayBodyFatRate = '00.00';
+      }
+    } else {
+      // 今日の体重が存在しない場合
+      todayBodyFatRate = '00.00';
     }
 
     if (diaryList.isNotEmpty) {
@@ -254,6 +314,9 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
   Widget build(BuildContext context) {
     // 今日の体重取得
     weightList = objectBox.getWeight(selectedDay: _focusedDay.toString());
+    // 今日の体脂肪率取得
+    bodyFatRateList =
+        objectBox.getBodyFatRate(selectedDay: _focusedDay.toString());
     // 今日の日記取得
     diaryList = objectBox.getDiary(selectedDay: _focusedDay.toString());
     // 先月の体重取得
@@ -265,7 +328,7 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
     if (lastMonthWeightList.isNotEmpty) {
       lastMonthWeight = lastMonthWeightList.first.weight.toStringAsFixed(2);
     } else {
-      lastMonthWeight = '0.00';
+      lastMonthWeight = '00.00';
     }
     // 去年の体重取得
     _lastYear = DateTime.parse(
@@ -275,7 +338,7 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
     if (lastYearWeightList.isNotEmpty) {
       lastYearWeight = lastYearWeightList.first.weight.toStringAsFixed(2);
     } else {
-      lastYearWeight = '0.00';
+      lastYearWeight = '00.00';
     }
     // 毎日の体重取得（カレンダー表示用）
     allWeightList = objectBox.getAllWeight();
@@ -285,14 +348,14 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
         months: 1,
         datetime: DateTime.parse(
             DateTime(_focusedDay.year, _focusedDay.month, 1).toString()));
-    sumWeight = 0.0;
+    sumWeight = 00.00;
     for (Weight weight in weightsData) {
       sumWeight += weight.weight;
     }
-    if (sumWeight != 0.0) {
+    if (sumWeight != 00.00) {
       averageWeight = sumWeight / weightsData.length;
     } else {
-      averageWeight = 0.0;
+      averageWeight = 00.00;
     }
 
     // 目標体重取得
@@ -305,25 +368,37 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
     if (weightList.isNotEmpty) {
       // 今日の体重が存在する場合
       todayWeight = weightList.first.weight.toStringAsFixed(2);
-      if (todayWeight.isNotEmpty && todayWeight != '00.0') {
+      if (todayWeight.isNotEmpty && todayWeight != '00.00') {
         // 00.00kgではない場合
         bmi = myHeight == 0
-            ? 0.0
+            ? 00.00
             : double.parse(todayWeight) / ((myHeight / 100) * (myHeight / 100));
         bmi = double.parse(bmi.toStringAsFixed(1));
         untilTarget = double.parse(
             (targetWeight - double.parse(todayWeight)).toStringAsFixed(2));
       } else {
         // 00.00kgの場合
-        todayWeight = '00.0';
-        bmi = 0.0;
-        untilTarget = 0.0;
+        todayWeight = '00.00';
+        bmi = 00.00;
+        untilTarget = 00.00;
       }
     } else {
       // 今日の体重が存在しない場合
-      todayWeight = '00.0';
-      bmi = 0.0;
-      untilTarget = 0.0;
+      todayWeight = '00.00';
+      bmi = 00.00;
+      untilTarget = 00.00;
+    }
+
+    if (bodyFatRateList.isNotEmpty) {
+      // 今日の体脂肪率が存在する場合
+      todayBodyFatRate = bodyFatRateList.first.bodyFatRate.toStringAsFixed(2);
+      if (todayBodyFatRate.isNotEmpty && todayBodyFatRate == '00.00') {
+        // 00.00%の場合
+        todayBodyFatRate = '00.00';
+      }
+    } else {
+      // 今日の体重が存在しない場合
+      todayBodyFatRate = '00.00';
     }
 
     if (diaryList.isNotEmpty) {
@@ -373,525 +448,592 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
         toolbarHeight: 20, // 高さを少し調整
         backgroundColor: Colors.white,
         title: Align(
-            alignment: Alignment.centerLeft, // 左寄せ
-            child: Row(
-              children: [
-                Icon(
-                  Icons.tips_and_updates_outlined,
-                  color: themeColor,
-                ),
-                const Padding(padding: EdgeInsets.only(right: 5)),
-                Text(
-                  '$countConsecutiveDates日連続継続中',
-                  style: const TextStyle(color: Colors.black54, fontSize: 15),
-                ),
-              ],
-            )),
+          alignment: Alignment.centerLeft, // 左寄せ
+          child: Row(
+            children: [
+              Icon(
+                Icons.tips_and_updates_outlined,
+                color: themeColor,
+              ),
+              const Padding(padding: EdgeInsets.only(right: 5)),
+              Text(
+                '$countConsecutiveDates日連続継続中',
+                style: const TextStyle(color: Colors.black54, fontSize: 15),
+              ),
+            ],
+          ),
+        ),
       ),
       backgroundColor: Colors.white,
       body: SingleChildScrollView(
-          child: Column(children: [
-        // カレンダー設定
-        TableCalendar(
-            locale: 'ja_JP',
-            firstDay: DateTime.utc(1900, 1, 1),
-            lastDay: DateTime.utc(2100, 12, 31),
-            focusedDay: _focusedDay,
-            currentDay: _currentDay,
-            rowHeight: 65,
-            daysOfWeekHeight: 25,
-            calendarBuilders: CalendarBuilders(
-              // カレンダーヘッダー設定（年月ピッカーと年月表示）
-              headerTitleBuilder: (context, day) {
-                day = DateTime.parse(
-                    DateTime(day.year, day.month, day.day).toString());
-                return Column(
-                  children: [
-                    Row(mainAxisAlignment: MainAxisAlignment.start, children: [
-                      IconButton(
-                        onPressed: () async {
-                          var selectedDate = await showMonthPicker(
-                              context: context,
-                              initialDate: day,
-                              firstDate: DateTime(2000, 12),
-                              lastDate: DateTime(2050, 12),
-                              locale: const Locale('ja', ''),
-                              headerColor: themeColor,
-                              selectedMonthTextColor: Colors.white,
-                              unselectedMonthTextColor: themeColor,
-                              selectedMonthBackgroundColor: themeColor,
-                              backgroundColor: Colors.white,
-                              roundedCornersRadius: 30,
-                              confirmWidget: Text(
-                                '完了',
-                                style: TextStyle(color: themeColor),
+        child: Column(
+          children: [
+            // カレンダー設定
+            TableCalendar(
+                locale: 'ja_JP',
+                firstDay: DateTime.utc(1900, 1, 1),
+                lastDay: DateTime.utc(2100, 12, 31),
+                focusedDay: _focusedDay,
+                currentDay: _currentDay,
+                rowHeight: 65,
+                daysOfWeekHeight: 25,
+                calendarBuilders: CalendarBuilders(
+                  // カレンダーヘッダー設定（年月ピッカーと年月表示）
+                  headerTitleBuilder: (context, day) {
+                    day = DateTime.parse(
+                        DateTime(day.year, day.month, day.day).toString());
+                    return Column(
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            IconButton(
+                              onPressed: () async {
+                                var selectedDate = await showMonthPicker(
+                                    context: context,
+                                    initialDate: day,
+                                    firstDate: DateTime(2000, 12),
+                                    lastDate: DateTime(2050, 12),
+                                    locale: const Locale('ja', ''),
+                                    headerColor: themeColor,
+                                    selectedMonthTextColor: Colors.white,
+                                    unselectedMonthTextColor: themeColor,
+                                    selectedMonthBackgroundColor: themeColor,
+                                    backgroundColor: Colors.white,
+                                    roundedCornersRadius: 30,
+                                    confirmWidget: Text(
+                                      '完了',
+                                      style: TextStyle(color: themeColor),
+                                    ),
+                                    cancelWidget: Text(
+                                      'キャンセル',
+                                      style: TextStyle(color: themeColor),
+                                    ));
+                                if (selectedDate != null) {
+                                  setState(() {
+                                    if (selectedDate.year ==
+                                            DateTime.now().year &&
+                                        selectedDate.month ==
+                                            DateTime.now().month) {
+                                      _focusedDay = DateTime.parse(DateTime(
+                                              DateTime.now().year,
+                                              DateTime.now().month,
+                                              DateTime.now().day)
+                                          .toString());
+                                    } else {
+                                      _focusedDay = DateTime.parse(DateTime(
+                                              selectedDate.year,
+                                              selectedDate.month,
+                                              selectedDate.day)
+                                          .toString());
+                                    }
+                                  });
+                                }
+                              },
+                              icon: const Icon(
+                                Icons.edit_calendar,
+                                color: Colors.black54,
                               ),
-                              cancelWidget: Text(
-                                'キャンセル',
-                                style: TextStyle(color: themeColor),
-                              ));
-                          if (selectedDate != null) {
-                            setState(() {
-                              if (selectedDate.year == DateTime.now().year &&
-                                  selectedDate.month == DateTime.now().month) {
-                                _focusedDay = DateTime.parse(DateTime(
-                                        DateTime.now().year,
-                                        DateTime.now().month,
-                                        DateTime.now().day)
-                                    .toString());
-                              } else {
-                                _focusedDay = DateTime.parse(DateTime(
-                                        selectedDate.year,
-                                        selectedDate.month,
-                                        selectedDate.day)
-                                    .toString());
-                              }
-                            });
-                          }
-                        },
-                        icon: const Icon(
-                          Icons.edit_calendar,
-                          color: Colors.black54,
-                        ),
-                      ),
-                      Text(
-                        '${day.month}月',
-                        style: const TextStyle(
-                            color: Colors.black54, fontSize: 18),
-                      ),
-                      if (day.month == 12)
-                        const Text(
-                          '🎅🎄',
-                          style: TextStyle(fontSize: 22),
-                        ),
-                    ])
-                  ],
-                );
-              },
-              // 曜日表示設定
-              dowBuilder: (context, day) {
-                day = DateTime.parse(
-                    DateTime(day.year, day.month, day.day).toString());
-                final dowText = DateFormat.E('ja').format(day);
-                return Container(
-                  decoration: BoxDecoration(
-                      // color: Colors.white,
-                      color: themeColor.withOpacity(0.3),
-                      border: Border.all(
-                        color: const Color.fromARGB(255, 230, 223, 223),
-                        width: 0.5,
-                      )),
-                  alignment: Alignment.topCenter,
-                  child: Center(
-                    child: Text(
-                      dowText.toString(),
-                      style: const TextStyle(color: Colors.black26),
-                    ),
-                  ),
-                );
-              },
-              // 表示月の設定
-              defaultBuilder: (context, day, focusedDay) {
-                day = DateTime.parse(
-                    DateTime(day.year, day.month, day.day).toString());
-                Weight weight;
-                // 体重全検索
-                weight = allWeightList.firstWhere((element) {
-                  return element.datetime.toString() == day.toString();
-                },
-                    orElse: () =>
-                        Weight(date: day.toString(), datetime: day, weight: 0));
-                return AnimatedContainer(
-                  duration: const Duration(milliseconds: 250),
-                  margin: EdgeInsets.zero,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    border: Border.all(
-                      color: const Color.fromARGB(255, 230, 223, 223),
-                      width: 0.5,
-                    ),
-                  ),
-                  alignment: Alignment.center,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Container(
-                        alignment: Alignment.topLeft,
-                        padding: const EdgeInsets.fromLTRB(2, 0, 0, 0),
+                            ),
+                            Text(
+                              '${day.month}月',
+                              style: const TextStyle(
+                                  color: Colors.black54, fontSize: 18),
+                            ),
+                            if (day.month == 12)
+                              const Text(
+                                '🎅🎄',
+                                style: TextStyle(fontSize: 22),
+                              ),
+                          ],
+                        )
+                      ],
+                    );
+                  },
+                  // 曜日表示設定
+                  dowBuilder: (context, day) {
+                    day = DateTime.parse(
+                        DateTime(day.year, day.month, day.day).toString());
+                    final dowText = DateFormat.E('ja').format(day);
+                    return Container(
+                      decoration: BoxDecoration(
+                          // color: Colors.white,
+                          color: themeColor.withOpacity(0.3),
+                          border: Border.all(
+                            color: const Color.fromARGB(255, 230, 223, 223),
+                            width: 0.5,
+                          )),
+                      alignment: Alignment.topCenter,
+                      child: Center(
                         child: Text(
-                          day.day.toString(),
-                          style: const TextStyle(
-                            fontSize: 11,
-                            color: Colors.black38,
+                          dowText.toString(),
+                          style: const TextStyle(color: Colors.black26),
+                        ),
+                      ),
+                    );
+                  },
+                  // 表示月の設定
+                  defaultBuilder: (context, day, focusedDay) {
+                    day = DateTime.parse(
+                        DateTime(day.year, day.month, day.day).toString());
+                    Weight weight;
+                    // 体重全検索
+                    weight = allWeightList.firstWhere((element) {
+                      return element.datetime.toString() == day.toString();
+                    },
+                        orElse: () => Weight(
+                            date: day.toString(), datetime: day, weight: 0));
+                    return AnimatedContainer(
+                      duration: const Duration(milliseconds: 250),
+                      margin: EdgeInsets.zero,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        border: Border.all(
+                          color: const Color.fromARGB(255, 230, 223, 223),
+                          width: 0.5,
+                        ),
+                      ),
+                      alignment: Alignment.center,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Container(
+                            alignment: Alignment.topLeft,
+                            padding: const EdgeInsets.fromLTRB(2, 0, 0, 0),
+                            child: Text(
+                              day.day.toString(),
+                              style: const TextStyle(
+                                fontSize: 11,
+                                color: Colors.black38,
+                              ),
+                            ),
                           ),
+                          Container(
+                              alignment: Alignment.center,
+                              child: Text(
+                                weight.weight == 0
+                                    ? ''
+                                    : weight.weight.toString(),
+                                style: const TextStyle(
+                                  color: Colors.black54,
+                                ),
+                              )),
+                        ],
+                      ),
+                    );
+                  },
+                  // 表示月以外の設定
+                  outsideBuilder: (context, day, focusedDay) {
+                    day = DateTime.parse(
+                        DateTime(day.year, day.month, day.day).toString());
+                    return AnimatedContainer(
+                      duration: const Duration(milliseconds: 250),
+                      margin: EdgeInsets.zero,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        border: Border.all(
+                          color: const Color.fromARGB(255, 230, 223, 223),
+                          width: 0.5,
                         ),
                       ),
-                      Container(
-                          alignment: Alignment.center,
-                          child: Text(
-                            weight.weight == 0 ? '' : weight.weight.toString(),
-                            style: const TextStyle(
-                              color: Colors.black54,
-                            ),
-                          )),
-                    ],
-                  ),
-                );
-              },
-              // 表示月以外の設定
-              outsideBuilder: (context, day, focusedDay) {
-                day = DateTime.parse(
-                    DateTime(day.year, day.month, day.day).toString());
-                return AnimatedContainer(
-                  duration: const Duration(milliseconds: 250),
-                  margin: EdgeInsets.zero,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    border: Border.all(
-                      color: const Color.fromARGB(255, 230, 223, 223),
-                      width: 0.5,
-                    ),
-                  ),
-                  alignment: Alignment.center,
-                  child: Text(
-                    day.day.toString(),
-                    style: const TextStyle(color: Colors.black12),
-                  ),
-                );
-              },
-              // 今日の日にちの設定
-              todayBuilder: (context, day, focusedDay) {
-                day = DateTime.parse(
-                    DateTime(day.year, day.month, day.day).toString());
-                Weight weight;
-                // 体重全検索
-                weight = allWeightList.firstWhere((element) {
-                  return element.datetime.toString() == day.toString();
-                },
-                    orElse: () =>
-                        Weight(date: day.toString(), datetime: day, weight: 0));
-                return AnimatedContainer(
-                  duration: const Duration(milliseconds: 300),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    border: Border.all(color: themeColor, width: 2),
-                  ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Container(
-                        alignment: Alignment.topLeft,
-                        padding: const EdgeInsets.fromLTRB(2, 0, 0, 0),
-                        child: Text(
-                          day.day.toString(),
-                          style: const TextStyle(
-                              color: Colors.black45,
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600),
-                        ),
+                      alignment: Alignment.center,
+                      child: Text(
+                        day.day.toString(),
+                        style: const TextStyle(color: Colors.black12),
                       ),
-                      Container(
-                          alignment: Alignment.center,
-                          child: Text(
-                            weight.weight == 0 ? '' : weight.weight.toString(),
-                            style: const TextStyle(
-                              color: Colors.black54,
+                    );
+                  },
+                  // 今日の日にちの設定
+                  todayBuilder: (context, day, focusedDay) {
+                    day = DateTime.parse(
+                        DateTime(day.year, day.month, day.day).toString());
+                    Weight weight;
+                    // 体重全検索
+                    weight = allWeightList.firstWhere((element) {
+                      return element.datetime.toString() == day.toString();
+                    },
+                        orElse: () => Weight(
+                            date: day.toString(), datetime: day, weight: 0));
+                    return AnimatedContainer(
+                      duration: const Duration(milliseconds: 300),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        border: Border.all(color: themeColor, width: 2),
+                      ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Container(
+                            alignment: Alignment.topLeft,
+                            padding: const EdgeInsets.fromLTRB(2, 0, 0, 0),
+                            child: Text(
+                              day.day.toString(),
+                              style: const TextStyle(
+                                  color: Colors.black45,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600),
                             ),
-                          )),
-                    ],
-                  ),
-                );
-              },
-            ),
-
-            // 日にち選択時の状態保持
-            onDaySelected: (selectedDay, focusedDay) {
-              selectedDay = DateTime.parse(
-                  DateTime(selectedDay.year, selectedDay.month, selectedDay.day)
-                      .toString());
-              weightList =
-                  objectBox.getWeight(selectedDay: selectedDay.toString());
-              diaryList =
-                  objectBox.getDiary(selectedDay: selectedDay.toString());
-
-              setState(() {
-                _currentDay = selectedDay;
-                _focusedDay = selectedDay;
-
-                // 先月の体重取得
-                _lastMonth = DateTime.parse(DateTime(_focusedDay.year,
-                        _focusedDay.month - 1, _focusedDay.day)
-                    .toString());
-                lastMonthWeightList =
-                    objectBox.getWeight(selectedDay: _lastMonth.toString());
-                if (lastMonthWeightList.isNotEmpty) {
-                  lastMonthWeight =
-                      lastMonthWeightList.first.weight.toStringAsFixed(2);
-                }
-                // 去年の体重取得
-                _lastYear = DateTime.parse(DateTime(_focusedDay.year - 1,
-                        _focusedDay.month, _focusedDay.day)
-                    .toString());
-                lastYearWeightList =
-                    objectBox.getWeight(selectedDay: _lastYear.toString());
-                if (lastYearWeightList.isNotEmpty) {
-                  lastYearWeight =
-                      lastYearWeightList.first.weight.toStringAsFixed(2);
-                }
-
-                if (weightList.isNotEmpty) {
-                  todayWeight = weightList.first.weight.toStringAsFixed(2);
-                  if (todayWeight.isNotEmpty && todayWeight != '00.0') {
-                    bmi = myHeight == 0
-                        ? 0.0
-                        : double.parse(todayWeight) /
-                            ((myHeight / 100) * (myHeight / 100));
-                    bmi = double.parse(bmi.toStringAsFixed(1));
-                    untilTarget = double.parse(
-                        (targetWeight - double.parse(todayWeight))
-                            .toStringAsFixed(2));
-                  } else {
-                    todayWeight = '00.0';
-                    bmi = 0.0;
-                    untilTarget = 0.0;
-                  }
-                } else {
-                  todayWeight = '00.0';
-                  bmi = 0.0;
-                  untilTarget = 0.0;
-                }
-
-                if (diaryList.isNotEmpty) {
-                  todayDiary = diaryList.first.content.toString();
-                } else {
-                  todayDiary = unWritingDiary;
-                }
-                if (todayDiary.isEmpty) {
-                  todayDiary = unWritingDiary;
-                }
-              });
-            },
-
-            // カレンダーヘッダースタイル
-            headerStyle: const HeaderStyle(
-              formatButtonVisible: false,
-              titleCentered: true,
-            )),
-
-        // 選択日付表示部分
-        Container(
-          height: 25,
-          alignment: Alignment.topLeft,
-          padding: const EdgeInsets.fromLTRB(10, 2, 0, 2),
-          // color: const Color.fromARGB(255, 221, 206, 197),
-          color: themeColor.withOpacity(0.3),
-          child: Text(
-            '${_focusedDay.year}年${_focusedDay.month}月${_focusedDay.day}日',
-            style: const TextStyle(color: Colors.black26, fontSize: 15),
-          ),
-        ),
-        Container(
-          decoration: const BoxDecoration(
-            color: Color(0xFFF5F5F5),
-          ),
-          child: Container(
-            margin: const EdgeInsets.fromLTRB(20, 20, 20, 10),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(15),
-              boxShadow: const [
-                BoxShadow(
-                  color: Color.fromRGBO(238, 238, 238, 1),
-                  spreadRadius: 1,
-                  blurRadius: 5,
-                  offset: Offset(1, 1),
+                          ),
+                          Container(
+                              alignment: Alignment.center,
+                              child: Text(
+                                weight.weight == 0
+                                    ? ''
+                                    : weight.weight.toString(),
+                                style: const TextStyle(
+                                  color: Colors.black54,
+                                ),
+                              )),
+                        ],
+                      ),
+                    );
+                  },
                 ),
-              ],
-            ),
-            child: Column(
-              children: [
-                // 体重入力部分
-                GestureDetector(
-                  onTap: () async {
-                    await DialogUtils.showEditingDialog(
-                        context, todayWeight, _focusedDay);
-                    setState(() {
-                      // 継続日数を取得
-                      countConsecutiveDates = objectBox.countConsecutiveDates();
-                      // 全ての体重を取得
-                      allWeightList = objectBox.getAllWeight();
-                      // 今日の体重を取得
-                      weightList = objectBox.getWeight(
-                          selectedDay: _focusedDay.toString());
-                      if (weightList.isNotEmpty) {
-                        todayWeight =
-                            weightList.first.weight.toStringAsFixed(2);
-                      } else {
-                        todayWeight = '00.0';
-                      }
-                      if (todayWeight.isNotEmpty && todayWeight != '00.0') {
+
+                // 日にち選択時の状態保持
+                onDaySelected: (selectedDay, focusedDay) {
+                  selectedDay = DateTime.parse(DateTime(
+                          selectedDay.year, selectedDay.month, selectedDay.day)
+                      .toString());
+                  weightList =
+                      objectBox.getWeight(selectedDay: selectedDay.toString());
+                  bodyFatRateList = objectBox.getBodyFatRate(
+                      selectedDay: _focusedDay.toString());
+                  diaryList =
+                      objectBox.getDiary(selectedDay: selectedDay.toString());
+
+                  setState(() {
+                    _currentDay = selectedDay;
+                    _focusedDay = selectedDay;
+
+                    // 先月の体重取得
+                    _lastMonth = DateTime.parse(DateTime(_focusedDay.year,
+                            _focusedDay.month - 1, _focusedDay.day)
+                        .toString());
+                    lastMonthWeightList =
+                        objectBox.getWeight(selectedDay: _lastMonth.toString());
+                    if (lastMonthWeightList.isNotEmpty) {
+                      lastMonthWeight =
+                          lastMonthWeightList.first.weight.toStringAsFixed(2);
+                    }
+                    // 去年の体重取得
+                    _lastYear = DateTime.parse(DateTime(_focusedDay.year - 1,
+                            _focusedDay.month, _focusedDay.day)
+                        .toString());
+                    lastYearWeightList =
+                        objectBox.getWeight(selectedDay: _lastYear.toString());
+                    if (lastYearWeightList.isNotEmpty) {
+                      lastYearWeight =
+                          lastYearWeightList.first.weight.toStringAsFixed(2);
+                    }
+
+                    if (weightList.isNotEmpty) {
+                      todayWeight = weightList.first.weight.toStringAsFixed(2);
+                      if (todayWeight.isNotEmpty && todayWeight != '00.00') {
                         bmi = myHeight == 0
-                            ? 0.0
+                            ? 00.00
                             : double.parse(todayWeight) /
                                 ((myHeight / 100) * (myHeight / 100));
                         bmi = double.parse(bmi.toStringAsFixed(1));
                         untilTarget = double.parse(
                             (targetWeight - double.parse(todayWeight))
                                 .toStringAsFixed(2));
+                      } else {
+                        todayWeight = '00.00';
+                        bmi = 00.00;
+                        untilTarget = 00.00;
                       }
-                      // 通知追加
-                      tz.initializeTimeZones();
-                      _initializeAndScheduleNotifications();
-                    });
-                  },
-                  behavior: HitTestBehavior.opaque,
-                  child: Container(
-                    padding: const EdgeInsets.fromLTRB(10, 10, 0, 0),
-                    child: Column(
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    } else {
+                      todayWeight = '00.00';
+                      bmi = 00.00;
+                      untilTarget = 00.00;
+                    }
+
+                    if (bodyFatRateList.isNotEmpty) {
+                      // 今日の体脂肪率が存在する場合
+                      todayBodyFatRate =
+                          bodyFatRateList.first.bodyFatRate.toStringAsFixed(2);
+                      if (todayBodyFatRate.isNotEmpty &&
+                          todayBodyFatRate == '00.00') {
+                        // 00.00%の場合
+                        todayBodyFatRate = '00.00';
+                      }
+                    } else {
+                      // 今日の体重が存在しない場合
+                      todayBodyFatRate = '00.00';
+                    }
+
+                    if (diaryList.isNotEmpty) {
+                      todayDiary = diaryList.first.content.toString();
+                    } else {
+                      todayDiary = unWritingDiary;
+                    }
+                    if (todayDiary.isEmpty) {
+                      todayDiary = unWritingDiary;
+                    }
+                  });
+                },
+
+                // カレンダーヘッダースタイル
+                headerStyle: const HeaderStyle(
+                  formatButtonVisible: false,
+                  titleCentered: true,
+                )),
+
+            // 選択日付表示部分
+            Container(
+              height: 25,
+              alignment: Alignment.topLeft,
+              padding: const EdgeInsets.fromLTRB(10, 2, 0, 2),
+              // color: const Color.fromARGB(255, 221, 206, 197),
+              color: themeColor.withOpacity(0.3),
+              child: Text(
+                '${_focusedDay.year}年${_focusedDay.month}月${_focusedDay.day}日',
+                style: const TextStyle(color: Colors.black26, fontSize: 15),
+              ),
+            ),
+            Container(
+              decoration: const BoxDecoration(
+                color: Color(0xFFF5F5F5),
+              ),
+              child: Container(
+                margin: const EdgeInsets.fromLTRB(20, 20, 20, 10),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(15),
+                  boxShadow: const [
+                    BoxShadow(
+                      color: Color.fromRGBO(238, 238, 238, 1),
+                      spreadRadius: 1,
+                      blurRadius: 5,
+                      offset: Offset(1, 1),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  children: [
+                    // 体重入力部分
+                    GestureDetector(
+                      onTap: () async {
+                        pushWithReloadByWeightWriting(
+                            context, todayWeight, todayBodyFatRate);
+                        // await DialogUtils.showEditingDialog(
+                        //     context, todayWeight, _focusedDay);
+                        setState(() {
+                          // 継続日数を取得
+                          countConsecutiveDates =
+                              objectBox.countConsecutiveDates();
+                          // 全ての体重を取得
+                          allWeightList = objectBox.getAllWeight();
+                          // 今日の体重を取得
+                          weightList = objectBox.getWeight(
+                              selectedDay: _focusedDay.toString());
+                          if (weightList.isNotEmpty) {
+                            todayWeight =
+                                weightList.first.weight.toStringAsFixed(2);
+                          } else {
+                            todayWeight = '00.00';
+                          }
+                          if (todayWeight.isNotEmpty &&
+                              todayWeight != '00.00') {
+                            bmi = myHeight == 0
+                                ? 00.00
+                                : double.parse(todayWeight) /
+                                    ((myHeight / 100) * (myHeight / 100));
+                            bmi = double.parse(bmi.toStringAsFixed(1));
+                            untilTarget = double.parse(
+                                (targetWeight - double.parse(todayWeight))
+                                    .toStringAsFixed(2));
+                          }
+                          // 通知追加
+                          tz.initializeTimeZones();
+                          _initializeAndScheduleNotifications();
+                        });
+                      },
+                      behavior: HitTestBehavior.opaque,
+                      child: Container(
+                        padding: const EdgeInsets.fromLTRB(10, 10, 0, 0),
+                        child: Column(
                           children: [
-                            Container(
-                              padding: const EdgeInsets.fromLTRB(20, 0, 0, 0),
-                              child: Column(
-                                children: [
-                                  const Text(
-                                    '今日の体重',
-                                    style: TextStyle(
-                                        fontSize: 12, color: Colors.black54),
-                                  ),
-                                  Text(
-                                    '$todayWeight kg',
-                                    style: const TextStyle(
-                                        fontSize: 30, color: Colors.black54),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            Container(
-                              margin: const EdgeInsets.fromLTRB(0, 10, 0, 0),
-                              child: Row(
-                                children: [
-                                  Column(children: [
-                                    Container(
-                                      margin:
-                                          const EdgeInsets.fromLTRB(0, 0, 5, 5),
-                                      width: 70,
-                                      alignment: Alignment.center,
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(5),
-                                        color: themeColor.withOpacity(0.4),
-                                      ),
-                                      child: const Text(
-                                        'BMI',
-                                        style: TextStyle(
-                                            color: Colors.white, fontSize: 13),
-                                      ),
-                                    ),
-                                    Container(
-                                      margin:
-                                          const EdgeInsets.fromLTRB(0, 0, 5, 5),
-                                      width: 70,
-                                      alignment: Alignment.center,
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(5),
-                                        color: themeColor.withOpacity(0.4),
-                                      ),
-                                      child: const Text(
-                                        '目標まで',
-                                        style: TextStyle(
-                                            color: Colors.white, fontSize: 13),
-                                      ),
-                                    ),
-                                  ]),
-                                  Column(
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceAround,
+                              children: [
+                                Container(
+                                  padding:
+                                      const EdgeInsets.fromLTRB(20, 0, 0, 0),
+                                  child: Column(
                                     children: [
-                                      Container(
-                                        margin: const EdgeInsets.fromLTRB(
-                                            0, 0, 5, 5),
-                                        child: Text(
-                                          '$bmi',
-                                          style: const TextStyle(
-                                              color: Colors.black54),
-                                        ),
+                                      const Text(
+                                        '今日の体重',
+                                        style: TextStyle(
+                                            fontSize: 12,
+                                            color: Colors.black54),
                                       ),
-                                      Container(
-                                        margin: const EdgeInsets.fromLTRB(
-                                            0, 0, 5, 5),
-                                        child: Text(
-                                          '$untilTarget kg',
-                                          style: const TextStyle(
-                                              color: Colors.black54),
-                                        ),
-                                      )
+                                      Text(
+                                        '$todayWeight kg',
+                                        style: const TextStyle(
+                                            fontSize: 30,
+                                            color: Colors.black54),
+                                      ),
                                     ],
                                   ),
-                                ],
-                              ),
+                                ),
+                                Container(
+                                  margin:
+                                      const EdgeInsets.fromLTRB(0, 10, 0, 0),
+                                  child: Row(
+                                    children: [
+                                      Column(children: [
+                                        Container(
+                                          margin: const EdgeInsets.fromLTRB(
+                                              0, 0, 5, 5),
+                                          width: 70,
+                                          alignment: Alignment.center,
+                                          decoration: BoxDecoration(
+                                            borderRadius:
+                                                BorderRadius.circular(5),
+                                            color: themeColor.withOpacity(0.4),
+                                          ),
+                                          child: const Text(
+                                            'BMI',
+                                            style: TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 13),
+                                          ),
+                                        ),
+                                        Container(
+                                          margin: const EdgeInsets.fromLTRB(
+                                              0, 0, 5, 5),
+                                          width: 70,
+                                          alignment: Alignment.center,
+                                          decoration: BoxDecoration(
+                                            borderRadius:
+                                                BorderRadius.circular(5),
+                                            color: themeColor.withOpacity(0.4),
+                                          ),
+                                          child: const Text(
+                                            '目標まで',
+                                            style: TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 13),
+                                          ),
+                                        ),
+                                        Container(
+                                          margin: const EdgeInsets.fromLTRB(
+                                              0, 0, 5, 5),
+                                          width: 70,
+                                          alignment: Alignment.center,
+                                          decoration: BoxDecoration(
+                                            borderRadius:
+                                                BorderRadius.circular(5),
+                                            color: themeColor.withOpacity(0.4),
+                                          ),
+                                          child: const Text(
+                                            '体脂肪率',
+                                            style: TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 13),
+                                          ),
+                                        ),
+                                      ]),
+                                      Column(
+                                        children: [
+                                          Container(
+                                            margin: const EdgeInsets.fromLTRB(
+                                                0, 0, 5, 5),
+                                            child: Text(
+                                              '$bmi',
+                                              style: const TextStyle(
+                                                  color: Colors.black54),
+                                            ),
+                                          ),
+                                          Container(
+                                            margin: const EdgeInsets.fromLTRB(
+                                                0, 0, 5, 5),
+                                            child: Text(
+                                              '$untilTarget kg',
+                                              style: const TextStyle(
+                                                  color: Colors.black54),
+                                            ),
+                                          ),
+                                          Container(
+                                            margin: const EdgeInsets.fromLTRB(
+                                                0, 0, 5, 5),
+                                            child: Text(
+                                              '$todayBodyFatRate %',
+                                              style: TextStyle(
+                                                  color: Colors.black54),
+                                            ),
+                                          )
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Container(
+                                    alignment: Alignment.centerRight,
+                                    child: const Icon(
+                                      Icons.chevron_right,
+                                      color: Colors.black38,
+                                    ))
+                              ],
                             ),
-                            Container(
-                                alignment: Alignment.centerRight,
-                                child: const Icon(
-                                  Icons.chevron_right,
-                                  color: Colors.black38,
-                                ))
                           ],
                         ),
-                      ],
-                    ),
-                  ),
-                ),
-                const Divider(
-                  indent: 10,
-                  endIndent: 10,
-                  thickness: 0.5,
-                  color: Color.fromRGBO(238, 238, 238, 1),
-                ),
-                GestureDetector(
-                  onTap: () async {
-                    pushWithReloadByDiaryWriting(context);
-                    setState(() {
-                      diaryList = objectBox.getDiary(
-                          selectedDay: _focusedDay.toString());
-                      if (diaryList.isNotEmpty) {
-                        todayDiary = diaryList.first.content.toString();
-                      }
-                    });
-                  },
-                  behavior: HitTestBehavior.opaque,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      Expanded(
-                        flex: 7,
-                        child: Container(
-                          height: 100,
-                          padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
-                          margin: const EdgeInsets.fromLTRB(10, 0, 0, 0),
-                          child: Text(
-                            todayDiary,
-                            style: const TextStyle(
-                                color: Colors.black54,
-                                letterSpacing: 1,
-                                fontSize: 15),
-                            overflow: TextOverflow.ellipsis,
-                            maxLines: 3,
-                          ),
-                        ),
                       ),
-                    ],
-                  ),
+                    ),
+                    const Divider(
+                      indent: 10,
+                      endIndent: 10,
+                      thickness: 0.5,
+                      color: Color.fromRGBO(238, 238, 238, 1),
+                    ),
+                    GestureDetector(
+                      onTap: () async {
+                        // カレンダー画面からの日記入力を無効化
+                        // pushWithReloadByDiaryWriting(context);
+                        // setState(() {
+                        //   diaryList = objectBox.getDiary(
+                        //       selectedDay: _focusedDay.toString());
+                        //   if (diaryList.isNotEmpty) {
+                        //     todayDiary = diaryList.first.content.toString();
+                        //   }
+                        // });
+                      },
+                      behavior: HitTestBehavior.opaque,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          Expanded(
+                            flex: 7,
+                            child: Container(
+                              height: 100,
+                              padding:
+                                  const EdgeInsets.fromLTRB(10, 10, 10, 10),
+                              margin: const EdgeInsets.fromLTRB(10, 0, 0, 0),
+                              child: Text(
+                                todayDiary,
+                                style: const TextStyle(
+                                    color: Colors.black54,
+                                    letterSpacing: 1,
+                                    fontSize: 15),
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 3,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
-          ),
-        ),
-        Container(
-            decoration: const BoxDecoration(
-              color: Color(0xFFF5F5F5),
-            ),
-            child: Container(
+            Container(
+              decoration: const BoxDecoration(
+                color: Color(0xFFF5F5F5),
+              ),
+              child: Container(
                 padding: const EdgeInsets.fromLTRB(0, 5, 0, 5),
                 margin: const EdgeInsets.fromLTRB(20, 0, 20, 200),
                 decoration: BoxDecoration(
@@ -959,8 +1101,12 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
                     ),
                     Container(),
                   ],
-                ))),
-      ])),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -1045,8 +1191,6 @@ class _TextEditingDialogState extends ConsumerState<TextEditingDialog> {
   }
 
   Future<void> requestReview() async {
-    // isAvailableは、iOS 10.3以降, Android 5.2以降&&Google Play Storeがinstallされている場合にtrueを返す
-    // SeeAlso: https://pub.dev/packages/in_app_review
     if (await inAppReview.isAvailable()) {
       inAppReview.requestReview();
     }
@@ -1063,7 +1207,7 @@ class _TextEditingDialogState extends ConsumerState<TextEditingDialog> {
   void initState() {
     super.initState();
     // TextFormFieldに初期値を代入する
-    if (widget.weight == '00.0') {
+    if (widget.weight == '00.00') {
       controller.text = '';
     } else {
       controller.text = widget.weight;
@@ -1234,76 +1378,6 @@ class _TextEditingDialogState extends ConsumerState<TextEditingDialog> {
           ),
         )
       ],
-    );
-  }
-}
-
-class ScrollAnimation extends StatefulWidget {
-  const ScrollAnimation({
-    super.key,
-    required this.child,
-    this.startTime = 1000, // アニメーション開始までの遅延時間
-    this.animateTime = 4000, // アニメーションの実行時間
-    this.endTime = 2000, // アニメーション終了後の静止時間
-  });
-
-  final Widget child;
-  final int startTime;
-  final int animateTime;
-  final int endTime;
-
-  @override
-  State<ScrollAnimation> createState() => _ScrollAnimationState();
-}
-
-class _ScrollAnimationState extends State<ScrollAnimation> {
-  final _controller = ScrollController();
-
-  late final totalTime = widget.startTime + widget.animateTime + widget.endTime;
-
-  late final _timer = Timer.periodic(
-    Duration(milliseconds: totalTime),
-    (_) => _startAnimation(),
-  );
-
-  Future<void> _startAnimation() async {
-    await Future.delayed(Duration(milliseconds: widget.startTime));
-    return _controller.animateTo(
-      _controller.position.maxScrollExtent,
-      duration: Duration(milliseconds: widget.animateTime),
-      curve: Curves.linear,
-    );
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _controller.addListener(() {
-      final position = _controller.position;
-      if (position.maxScrollExtent == position.pixels) {
-        Future.delayed(Duration(milliseconds: widget.endTime)).then((_) {
-          _controller.jumpTo(0);
-        });
-      }
-    });
-
-    _startAnimation().then((_) {
-      _timer;
-    });
-  }
-
-  @override
-  void dispose() {
-    _timer.cancel();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      controller: _controller,
-      scrollDirection: Axis.horizontal,
-      child: widget.child,
     );
   }
 }

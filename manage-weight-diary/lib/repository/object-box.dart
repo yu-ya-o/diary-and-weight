@@ -1,4 +1,5 @@
 import '../objectbox.g.dart';
+import '../entity/bodyFatRate.dart';
 import '../entity/weight.dart';
 import '../entity/diary.dart';
 import '../entity/setting.dart';
@@ -6,11 +7,13 @@ import '../entity/setting.dart';
 class ObjectBox {
   late final Store store;
   late final Box<Weight> weightBox;
+  late final Box<BodyFatRate> bodyFatRateBox;
   late final Box<Diary> diaryBox;
   late final Box<Setting> settingBox;
 
   ObjectBox._create(this.store) {
     weightBox = Box<Weight>(store);
+    bodyFatRateBox = Box<BodyFatRate>(store);
     diaryBox = Box<Diary>(store);
     settingBox = Box<Setting>(store);
   }
@@ -56,6 +59,46 @@ class ObjectBox {
       required double weight,
       required DateTime datetime}) {
     weightBox.put(Weight(date: focusedDay, weight: weight, datetime: datetime));
+  }
+
+  List<BodyFatRate> getBodyFatRate({required String selectedDay}) {
+    Query<BodyFatRate> bodyFatRateQuery =
+        bodyFatRateBox.query(BodyFatRate_.date.equals(selectedDay)).build();
+    return bodyFatRateQuery.find();
+  }
+
+  List<BodyFatRate> getBodyFatRates(
+      {required int months, required DateTime datetime}) {
+    DateTime nextMonth = datetime;
+    if (months == 1) {
+      nextMonth = DateTime(datetime.year, datetime.month + 1, 1);
+    } else if (months == 3) {
+      nextMonth = DateTime(datetime.year, datetime.month + 3, 1);
+    } else if (months == 6) {
+      nextMonth = DateTime(datetime.year, datetime.month + 6, 1);
+    } else if (months == 12) {
+      nextMonth = DateTime(datetime.year, datetime.month + 12, 1);
+    }
+    Query<BodyFatRate> bodyFatRateQuery = (bodyFatRateBox
+            .query(BodyFatRate_.datetime
+                .greaterOrEqual(datetime.millisecondsSinceEpoch)
+                .and(BodyFatRate_.datetime
+                    .lessThan(nextMonth.millisecondsSinceEpoch)))
+            .order(BodyFatRate_.datetime))
+        .build();
+    return bodyFatRateQuery.find();
+  }
+
+  List<BodyFatRate> getAllBodyFatRate() {
+    return bodyFatRateBox.getAll();
+  }
+
+  void addBodyFatRate(
+      {required String focusedDay,
+      required double bodyFatRate,
+      required DateTime datetime}) {
+    bodyFatRateBox.put(BodyFatRate(
+        date: focusedDay, bodyFatRate: bodyFatRate, datetime: datetime));
   }
 
   int countConsecutiveDates() {
