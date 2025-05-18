@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:disiry_weight_mng/entity/bodyFatRate.dart';
 import 'package:disiry_weight_mng/main.dart';
-import 'package:disiry_weight_mng/pages/diary-writing-page.dart';
 import 'package:disiry_weight_mng/pages/weight-writing-page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -30,10 +29,67 @@ class CalendarPage extends ConsumerStatefulWidget {
 }
 
 class _CalendarPageState extends ConsumerState<CalendarPage> {
+  // ----------
+  // 定数定義
+  // ----------
+  final String defaultDiaryMessage = '今日は何した？何食べた？';
+
+  // ----------
+  // 変数定義
+  // ----------
+  double myHeight = 00.00; // 身長
+  double bmi = 00.00; // BMI
+  double targetWeight = 00.00; // 目標体重
+  double untilTarget = 00.00; // 目標差
+
+  Color themeColor = Colors.blue; // 初期テーマカラー
+  int countConsecutiveDates = 0; // 継続日数
+
+  String todayWeight = ''; // 選択日の体重
+  String lastMonthWeight = ''; // 先月の体重
+  String lastYearWeight = ''; // 去年の体重
+  String todayBodyFatRate = ''; // 選択日の体脂肪率
+  String todayDiary = ''; // 選択日の日記
+
+  List<Weight> weightList = List.empty(); // 選択日の体重リスト
+  List<Weight> lastMonthWeightList = List.empty(); // 先月の体重リスト
+  List<Weight> lastYearWeightList = List.empty(); // 去年の体重リスト
+  List<Weight> allWeightList = List.empty(); // 全ての体重リスト
+  List<BodyFatRate> bodyFatRateList = List.empty(); // 選択日の体脂肪率リスト
+  List<Diary> diaryList = List.empty(); // 日記リスト
+
+  // 今日の日付
+  DateTime _currentDay = DateTime.parse(
+      DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day)
+          .toString());
+
+  // 選択されている日付
+  DateTime _focusedDay = DateTime.parse(
+      DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day)
+          .toString());
+
+  // 1ヶ月前の日付
+  DateTime _lastMonth = DateTime.parse(DateTime(
+          DateTime.now().year, DateTime.now().month - 1, DateTime.now().day)
+      .toString());
+
+  // 1年前の日付
+  DateTime _lastYear = DateTime.parse(DateTime(
+          DateTime.now().year - 1, DateTime.now().month, DateTime.now().day)
+      .toString());
+
+  // 平均体重表示用
+  List<Weight> weightsData = [];
+  double averageWeight = 00.00;
+  double sumWeight = 00.00;
+
+  // ----------
   // 通知設定
+  // ----------
   final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
 
+  // 通知の初期化
   Future<void> _initializeNotifications() async {
     const DarwinInitializationSettings initializationSettingsDarwin =
         DarwinInitializationSettings(
@@ -48,30 +104,33 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
     await flutterLocalNotificationsPlugin.initialize(initializationSettings);
   }
 
+  // 通知の追加
   Future<void> _addNotification() async {
-    // 設定されている全ての通知を削除
+    // ①設定されている全ての通知を削除
     await flutterLocalNotificationsPlugin.cancelAll();
+
     // Local TimeZone
     String timeZoneName = await FlutterNativeTimezone.getLocalTimezone();
     final location = tz.getLocation(timeZoneName);
 
-    // 現在時刻を取得
+    // ②設定時刻(デフォルト20時)
     tz.TZDateTime scheduledTime = tz.TZDateTime.from(
         DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day,
             20, 0),
         location);
 
+    // ③2週間分の通知を設定する
     int noticeDays = 14;
 
-    String title = '日記と体重';
+    // 通知タイトル
+    const String title = '日記と体重';
+    String message = 'お疲れ様です！今日もちょこっとだけ日記と体重を記録しませんか？';
 
+    // ⑤通知を追加する
     for (int i = 0; i < noticeDays; i++) {
-      String message = 'お疲れ様です！今日もちょこっとだけ日記と体重を記録しませんか？';
-      // Setting Notifications
       if (i != 0) {
         scheduledTime = scheduledTime.add(const Duration(days: 1));
-      }
-      if (i == 0) {
+      } else if (i == 0) {
         if (weightList.isNotEmpty) {
           // 既に入力済みであればスキップ
           continue;
@@ -105,67 +164,6 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
     await _initializeNotifications();
     await _addNotification();
   }
-
-  // 日記なしメッセージ
-  // final String unWritingDiary = 'どんな一日でしたか？\n１行だけでも書いてみましょう！\nここをタップ';
-  final String unWritingDiary = '今日は何した？何食べた？';
-
-  // カレンダーが表示される日付
-  DateTime _focusedDay = DateTime.parse(
-      DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day)
-          .toString());
-  // カレンダー上でマークが表示される日付
-  DateTime _currentDay = DateTime.parse(
-      DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day)
-          .toString());
-
-  // 先月
-  DateTime _lastMonth = DateTime.parse(DateTime(
-          DateTime.now().year, DateTime.now().month - 1, DateTime.now().day)
-      .toString());
-
-  // 去年
-  DateTime _lastYear = DateTime.parse(DateTime(
-          DateTime.now().year - 1, DateTime.now().month, DateTime.now().day)
-      .toString());
-
-  // 選択日の体重
-  List<Weight> weightList = List.empty();
-  String todayWeight = '';
-  // 先月の体重
-  List<Weight> lastMonthWeightList = List.empty();
-  String lastMonthWeight = '00.00';
-  // 去年の体重
-  List<Weight> lastYearWeightList = List.empty();
-  String lastYearWeight = '00.00';
-  // 全体重
-  List<Weight> allWeightList = List.empty();
-  // 選択日の体脂肪率
-  List<BodyFatRate> bodyFatRateList = List.empty();
-  String todayBodyFatRate = '';
-  // 選択日の日記
-  List<Diary> diaryList = List.empty();
-  String todayDiary = '';
-
-  // 平均体重表示用
-  List<Weight> weightsData = [];
-  double averageWeight = 00.00;
-  double sumWeight = 00.00;
-
-  // 身長
-  double myHeight = 00.00;
-  // BMI
-  double bmi = 00.00;
-  // 目標体重
-  double targetWeight = 00.00;
-  // 目標体重まで
-  double untilTarget = 00.00;
-
-  // 初期テーマカラー
-  Color themeColor = Colors.blue;
-
-  // 継続日数
-  int countConsecutiveDates = 0;
 
   // リロード
   void pushWithReloadByWeightWriting(
@@ -225,11 +223,11 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
           todayDiary = diaryList.first.content.toString();
         } else {
           // 今日の日記が存在しない場合、メッセージ表示
-          todayDiary = unWritingDiary;
+          todayDiary = defaultDiaryMessage;
         }
         if (todayDiary.isEmpty) {
           // 今日の日記が存在しない場合、メッセージ表示
-          todayDiary = unWritingDiary;
+          todayDiary = defaultDiaryMessage;
         }
       });
     }
@@ -298,11 +296,11 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
       todayDiary = diaryList.first.content.toString();
     } else {
       // 今日の日記が存在しない場合、メッセージ表示
-      todayDiary = unWritingDiary;
+      todayDiary = defaultDiaryMessage;
     }
     if (todayDiary.isEmpty) {
       // 今日の日記が存在しない場合、メッセージ表示
-      todayDiary = unWritingDiary;
+      todayDiary = defaultDiaryMessage;
     }
 
     // 通知追加
@@ -406,11 +404,11 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
       todayDiary = diaryList.first.content.toString();
     } else {
       // 今日の日記が存在しない場合、メッセージ表示
-      todayDiary = unWritingDiary;
+      todayDiary = defaultDiaryMessage;
     }
     if (todayDiary.isEmpty) {
       // 今日の日記が存在しない場合、メッセージ表示
-      todayDiary = unWritingDiary;
+      todayDiary = defaultDiaryMessage;
     }
 
     // テーマカラーのプロバイダーを監視
@@ -766,10 +764,10 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
                     if (diaryList.isNotEmpty) {
                       todayDiary = diaryList.first.content.toString();
                     } else {
-                      todayDiary = unWritingDiary;
+                      todayDiary = defaultDiaryMessage;
                     }
                     if (todayDiary.isEmpty) {
-                      todayDiary = unWritingDiary;
+                      todayDiary = defaultDiaryMessage;
                     }
                   });
                 },
@@ -961,7 +959,7 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
                                                 0, 0, 5, 5),
                                             child: Text(
                                               '$todayBodyFatRate %',
-                                              style: TextStyle(
+                                              style: const TextStyle(
                                                   color: Colors.black54),
                                             ),
                                           )

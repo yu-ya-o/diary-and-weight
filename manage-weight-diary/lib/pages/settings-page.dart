@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:disiry_weight_mng/pages/news-letter.dart';
+// import 'package:disiry_weight_mng/pages/news-letter.dart';
 import 'package:flutter/material.dart';
 import 'package:disiry_weight_mng/main.dart';
 import 'package:flutter/services.dart';
@@ -159,34 +159,34 @@ class _SettingsPageState extends State<SettingsPage> {
                 ),
               ),
             ),
-            const Divider(
-              color: Color.fromRGBO(238, 238, 238, 1),
-            ),
-            GestureDetector(
-              onTap: () async {
-                await Navigator.of(context).push<void>(
-                  MaterialPageRoute(
-                    builder: (context) => NewsLetterPage(),
-                  ),
-                );
-              },
-              behavior: HitTestBehavior.opaque,
-              child: SizedBox(
-                height: 40,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Container(
-                      margin: const EdgeInsets.fromLTRB(10, 0, 0, 0),
-                      child: const Text(
-                        '「日記と体重」運営者の日記',
-                        style: TextStyle(color: Colors.black54),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
+            // const Divider(
+            //   color: Color.fromRGBO(238, 238, 238, 1),
+            // ),
+            // GestureDetector(
+            //   onTap: () async {
+            //     await Navigator.of(context).push<void>(
+            //       MaterialPageRoute(
+            //         builder: (context) => NewsLetterPage(),
+            //       ),
+            //     );
+            //   },
+            //   behavior: HitTestBehavior.opaque,
+            //   child: SizedBox(
+            //     height: 40,
+            //     child: Row(
+            //       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            //       children: [
+            //         Container(
+            //           margin: const EdgeInsets.fromLTRB(10, 0, 0, 0),
+            //           child: const Text(
+            //             '「日記と体重」運営者の日記',
+            //             style: TextStyle(color: Colors.black54),
+            //           ),
+            //         ),
+            //       ],
+            //     ),
+            //   ),
+            // ),
             const Divider(
               color: Color.fromRGBO(238, 238, 238, 1),
             ),
