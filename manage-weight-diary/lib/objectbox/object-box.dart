@@ -1,18 +1,19 @@
-import '../objectbox.g.dart';
+import 'package:disiry_weight_mng/repository/weight_repository.dart';
+
+import 'objectbox.g.dart';
 import '../entity/bodyFatRate.dart';
-import '../entity/weight.dart';
 import '../entity/diary.dart';
 import '../entity/setting.dart';
 
 class ObjectBox {
   late final Store store;
-  late final Box<Weight> weightBox;
+  late final WeightRepository weightRepository;
   late final Box<BodyFatRate> bodyFatRateBox;
   late final Box<Diary> diaryBox;
   late final Box<Setting> settingBox;
 
   ObjectBox._create(this.store) {
-    weightBox = Box<Weight>(store);
+    weightRepository = WeightRepository(store);
     bodyFatRateBox = Box<BodyFatRate>(store);
     diaryBox = Box<Diary>(store);
     settingBox = Box<Setting>(store);
@@ -23,43 +24,29 @@ class ObjectBox {
     return ObjectBox._create(store);
   }
 
-  List<Weight> getWeight({required String selectedDay}) {
-    Query<Weight> weightQuery =
-        weightBox.query(Weight_.date.equals(selectedDay)).build();
-    return weightQuery.find();
-  }
+  // List<Weight> getWeight({required String selectedDay}) {
+  //   return weightDataSource.getWeight(selectedDay);
+  // }
 
-  List<Weight> getWeights({required int months, required DateTime datetime}) {
-    DateTime nextMonth = datetime;
-    if (months == 1) {
-      nextMonth = DateTime(datetime.year, datetime.month + 1, 1);
-    } else if (months == 3) {
-      nextMonth = DateTime(datetime.year, datetime.month + 3, 1);
-    } else if (months == 6) {
-      nextMonth = DateTime(datetime.year, datetime.month + 6, 1);
-    } else if (months == 12) {
-      nextMonth = DateTime(datetime.year, datetime.month + 12, 1);
-    }
-    Query<Weight> weightQuery = (weightBox
-            .query(Weight_.datetime
-                .greaterOrEqual(datetime.millisecondsSinceEpoch)
-                .and(Weight_.datetime
-                    .lessThan(nextMonth.millisecondsSinceEpoch)))
-            .order(Weight_.datetime))
-        .build();
-    return weightQuery.find();
-  }
+  // List<Weight> getWeights({required int months, required DateTime datetime}) {
+  //   return weightDataSource.getWeights(months, datetime);
+  // }
 
-  List<Weight> getAllWeight() {
-    return weightBox.getAll();
-  }
+  // List<Weight> getAllWeight() {
+  //   return weightDataSource.getAllWeights();
+  // }
 
-  void addWeight(
-      {required String focusedDay,
-      required double weight,
-      required DateTime datetime}) {
-    weightBox.put(Weight(date: focusedDay, weight: weight, datetime: datetime));
-  }
+  // void addWeight(
+  //     {required String focusedDay,
+  //     required double weight,
+  //     required DateTime datetime}) {
+  //   weightDataSource.addWeight(
+  //       focusedDay: focusedDay, weight: weight, datetime: datetime);
+  // }
+
+  // int countConsecutiveDates() {
+  //   return weightDataSource.countConsecutiveDates();
+  // }
 
   List<BodyFatRate> getBodyFatRate({required String selectedDay}) {
     Query<BodyFatRate> bodyFatRateQuery =
@@ -99,57 +86,6 @@ class ObjectBox {
       required DateTime datetime}) {
     bodyFatRateBox.put(BodyFatRate(
         date: focusedDay, bodyFatRate: bodyFatRate, datetime: datetime));
-  }
-
-  int countConsecutiveDates() {
-    // 今日の日付（時刻を削除）
-    final today = DateTime.now();
-    final todayOnly = DateTime(today.year, today.month, today.day);
-    final yesterdayOnly = todayOnly.subtract(Duration(days: 1));
-
-    // 今日までのデータを取得し、日付順にソート
-    final weights = weightBox
-        .query(Weight_.datetime.lessOrEqual(todayOnly.millisecondsSinceEpoch))
-        .order(Weight_.datetime)
-        .build()
-        .find();
-
-    if (weights.isEmpty) {
-      return 0; // データがない場合は 0
-    }
-
-    // 最新の日付を取得（時刻を削除）
-    DateTime lastDate = DateTime(
-      weights.last.datetime.year,
-      weights.last.datetime.month,
-      weights.last.datetime.day,
-    );
-
-    // 最新の日付が「今日」または「昨日」でなければ 0 を返す
-    if (lastDate != todayOnly && lastDate != yesterdayOnly) {
-      return 0;
-    }
-
-    int count = 1; // 連続日数（データが1つでもあれば1から開始）
-
-    // 連続する日付をカウント
-    for (int i = weights.length - 2; i >= 0; i--) {
-      final prevDate = DateTime(
-        weights[i].datetime.year,
-        weights[i].datetime.month,
-        weights[i].datetime.day,
-      );
-
-      // 連続している場合のみカウント
-      if (lastDate.difference(prevDate).inDays == 1) {
-        count++;
-        lastDate = prevDate; // 更新
-      } else {
-        break; // 連続が途切れたら終了
-      }
-    }
-
-    return count;
   }
 
   List<Diary> getDiary({required String selectedDay}) {

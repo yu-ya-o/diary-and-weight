@@ -68,8 +68,8 @@ class _WeightChartState extends ConsumerState<WeightChart> {
   @override
   void initState() {
     super.initState();
-    weightsData =
-        objectBox.getWeights(months: selectedPeriod, datetime: displayDate);
+    weightsData = objectBox.weightRepository
+        .getWeights(months: selectedPeriod, datetime: displayDate);
     weights.clear();
     dates.clear();
     for (Weight weight in weightsData) {
@@ -82,8 +82,8 @@ class _WeightChartState extends ConsumerState<WeightChart> {
   @override
   Widget build(BuildContext context) {
     sumWeight = 0.0;
-    weightsData =
-        objectBox.getWeights(months: selectedPeriod, datetime: displayDate);
+    weightsData = objectBox.weightRepository
+        .getWeights(months: selectedPeriod, datetime: displayDate);
     weights.clear();
     dates.clear();
     for (Weight weight in weightsData) {
@@ -188,7 +188,7 @@ class _WeightChartState extends ConsumerState<WeightChart> {
                       displayDate = DateTime.parse(
                           DateTime(selectedDate.year, selectedDate.month, 1)
                               .toString());
-                      weightsData = objectBox.getWeights(
+                      weightsData = objectBox.weightRepository.getWeights(
                           months: selectedPeriod, datetime: displayDate);
                       weights.clear();
                       dates.clear();
@@ -234,7 +234,7 @@ class _WeightChartState extends ConsumerState<WeightChart> {
                 if (index == 0) {
                   selectedPeriod = 1;
                   maxX = 31;
-                  weightsData = objectBox.getWeights(
+                  weightsData = objectBox.weightRepository.getWeights(
                       months: selectedPeriod, datetime: displayDate);
                   weights.clear();
                   dates.clear();
@@ -245,7 +245,7 @@ class _WeightChartState extends ConsumerState<WeightChart> {
                 } else if (index == 1) {
                   selectedPeriod = 3;
                   maxX = 92;
-                  weightsData = objectBox.getWeights(
+                  weightsData = objectBox.weightRepository.getWeights(
                       months: selectedPeriod, datetime: displayDate);
                   weights.clear();
                   dates.clear();
@@ -256,7 +256,7 @@ class _WeightChartState extends ConsumerState<WeightChart> {
                 } else if (index == 2) {
                   selectedPeriod = 6;
                   maxX = 184;
-                  weightsData = objectBox.getWeights(
+                  weightsData = objectBox.weightRepository.getWeights(
                       months: selectedPeriod, datetime: displayDate);
                   weights.clear();
                   dates.clear();
@@ -267,7 +267,7 @@ class _WeightChartState extends ConsumerState<WeightChart> {
                 } else if (index == 3) {
                   selectedPeriod = 12;
                   maxX = 366;
-                  weightsData = objectBox.getWeights(
+                  weightsData = objectBox.weightRepository.getWeights(
                       months: selectedPeriod, datetime: displayDate);
                   weights.clear();
                   dates.clear();

@@ -237,16 +237,17 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
   void initState() {
     super.initState();
     // 継続日数取得
-    countConsecutiveDates = objectBox.countConsecutiveDates();
+    countConsecutiveDates = objectBox.weightRepository.countConsecutiveDates();
     // 今日の体重取得
-    weightList = objectBox.getWeight(selectedDay: _focusedDay.toString());
+    weightList = objectBox.weightRepository
+        .getWeight(selectedDay: _focusedDay.toString());
     // 今日の体脂肪率取得
     bodyFatRateList =
         objectBox.getBodyFatRate(selectedDay: _focusedDay.toString());
     // 今日の日記取得
     diaryList = objectBox.getDiary(selectedDay: _focusedDay.toString());
     // 毎日の体重取得（カレンダー表示用）
-    allWeightList = objectBox.getAllWeight();
+    allWeightList = objectBox.weightRepository.getAllWeights();
 
     // 目標体重取得
     targetWeight = double.parse(
@@ -311,7 +312,8 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
   @override
   Widget build(BuildContext context) {
     // 今日の体重取得
-    weightList = objectBox.getWeight(selectedDay: _focusedDay.toString());
+    weightList = objectBox.weightRepository
+        .getWeight(selectedDay: _focusedDay.toString());
     // 今日の体脂肪率取得
     bodyFatRateList =
         objectBox.getBodyFatRate(selectedDay: _focusedDay.toString());
@@ -321,8 +323,8 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
     _lastMonth = DateTime.parse(
         DateTime(_focusedDay.year, _focusedDay.month - 1, _focusedDay.day)
             .toString());
-    lastMonthWeightList =
-        objectBox.getWeight(selectedDay: _lastMonth.toString());
+    lastMonthWeightList = objectBox.weightRepository
+        .getWeight(selectedDay: _lastMonth.toString());
     if (lastMonthWeightList.isNotEmpty) {
       lastMonthWeight = lastMonthWeightList.first.weight.toStringAsFixed(2);
     } else {
@@ -332,17 +334,18 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
     _lastYear = DateTime.parse(
         DateTime(_focusedDay.year - 1, _focusedDay.month, _focusedDay.day)
             .toString());
-    lastYearWeightList = objectBox.getWeight(selectedDay: _lastYear.toString());
+    lastYearWeightList =
+        objectBox.weightRepository.getWeight(selectedDay: _lastYear.toString());
     if (lastYearWeightList.isNotEmpty) {
       lastYearWeight = lastYearWeightList.first.weight.toStringAsFixed(2);
     } else {
       lastYearWeight = '00.00';
     }
     // 毎日の体重取得（カレンダー表示用）
-    allWeightList = objectBox.getAllWeight();
+    allWeightList = objectBox.weightRepository.getAllWeights();
 
     // 平均体重
-    weightsData = objectBox.getWeights(
+    weightsData = objectBox.weightRepository.getWeights(
         months: 1,
         datetime: DateTime.parse(
             DateTime(_focusedDay.year, _focusedDay.month, 1).toString()));
@@ -693,8 +696,8 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
                   selectedDay = DateTime.parse(DateTime(
                           selectedDay.year, selectedDay.month, selectedDay.day)
                       .toString());
-                  weightList =
-                      objectBox.getWeight(selectedDay: selectedDay.toString());
+                  weightList = objectBox.weightRepository
+                      .getWeight(selectedDay: selectedDay.toString());
                   bodyFatRateList = objectBox.getBodyFatRate(
                       selectedDay: _focusedDay.toString());
                   diaryList =
@@ -708,8 +711,8 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
                     _lastMonth = DateTime.parse(DateTime(_focusedDay.year,
                             _focusedDay.month - 1, _focusedDay.day)
                         .toString());
-                    lastMonthWeightList =
-                        objectBox.getWeight(selectedDay: _lastMonth.toString());
+                    lastMonthWeightList = objectBox.weightRepository
+                        .getWeight(selectedDay: _lastMonth.toString());
                     if (lastMonthWeightList.isNotEmpty) {
                       lastMonthWeight =
                           lastMonthWeightList.first.weight.toStringAsFixed(2);
@@ -718,8 +721,8 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
                     _lastYear = DateTime.parse(DateTime(_focusedDay.year - 1,
                             _focusedDay.month, _focusedDay.day)
                         .toString());
-                    lastYearWeightList =
-                        objectBox.getWeight(selectedDay: _lastYear.toString());
+                    lastYearWeightList = objectBox.weightRepository
+                        .getWeight(selectedDay: _lastYear.toString());
                     if (lastYearWeightList.isNotEmpty) {
                       lastYearWeight =
                           lastYearWeightList.first.weight.toStringAsFixed(2);
@@ -819,13 +822,14 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
                         //     context, todayWeight, _focusedDay);
                         setState(() {
                           // 継続日数を取得
-                          countConsecutiveDates =
-                              objectBox.countConsecutiveDates();
+                          countConsecutiveDates = objectBox.weightRepository
+                              .countConsecutiveDates();
                           // 全ての体重を取得
-                          allWeightList = objectBox.getAllWeight();
+                          allWeightList =
+                              objectBox.weightRepository.getAllWeights();
                           // 今日の体重を取得
-                          weightList = objectBox.getWeight(
-                              selectedDay: _focusedDay.toString());
+                          weightList = objectBox.weightRepository
+                              .getWeight(selectedDay: _focusedDay.toString());
                           if (weightList.isNotEmpty) {
                             todayWeight =
                                 weightList.first.weight.toStringAsFixed(2);
@@ -1275,7 +1279,7 @@ class _TextEditingDialogState extends ConsumerState<TextEditingDialog> {
         onFieldSubmitted: (_) {
           // エンターを押したときに実行される
           if (controller.text.isNotEmpty) {
-            objectBox.addWeight(
+            objectBox.weightRepository.addWeight(
                 focusedDay: widget.focusedDay.toString(),
                 weight: double.parse(
                     double.parse(controller.text).toStringAsFixed(2)),
@@ -1288,13 +1292,13 @@ class _TextEditingDialogState extends ConsumerState<TextEditingDialog> {
         TextButton(
           onPressed: () async {
             if (controller.text.isNotEmpty) {
-              objectBox.addWeight(
+              objectBox.weightRepository.addWeight(
                   focusedDay: widget.focusedDay.toString(),
                   weight: double.parse(
                       double.parse(controller.text).toStringAsFixed(2)),
                   datetime: widget.focusedDay);
             }
-            List<Weight> monthWeights = objectBox.getWeights(
+            List<Weight> monthWeights = objectBox.weightRepository.getWeights(
                 months: 1,
                 datetime: DateTime.parse(
                     DateTime(DateTime.now().year, DateTime.now().month, 1)

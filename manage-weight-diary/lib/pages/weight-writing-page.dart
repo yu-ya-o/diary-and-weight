@@ -174,8 +174,8 @@ class _WeightWritingPageState extends State<WeightWritingPage> {
                       await WeightDialogUtils.showEditingDialog(
                           context, weight, focusedDay);
                       setState(() {
-                        List<Weight> weightList = objectBox.getWeight(
-                            selectedDay: focusedDay.toString());
+                        List<Weight> weightList = objectBox.weightRepository
+                            .getWeight(selectedDay: focusedDay.toString());
                         if (weightList.isNotEmpty) {
                           weight = weightList.first.weight.toString();
                         }
@@ -373,284 +373,6 @@ class _WeightWritingPageState extends State<WeightWritingPage> {
       ),
     );
   }
-
-  // void weightPicker() {
-  //   int selectedInteger = 50; // 初期値: 50
-  //   int selectedDecimal = 0; // 初期値: .00
-
-  //   if (double.parse(weight) != 0) {
-  //     // ドラムロールの表示用
-  //     // weightを小数点の右側と左側に分ける
-  //     List<String> parts = weight.split('.');
-  //     selectedInteger = int.parse(parts[0]);
-  //     selectedDecimal = int.parse(parts[1]);
-  //   }
-
-  //   showModalBottomSheet(
-  //     context: context,
-  //     backgroundColor: Colors.white,
-  //     isScrollControlled: true,
-  //     shape: const RoundedRectangleBorder(
-  //       borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-  //     ),
-  //     builder: (BuildContext context) {
-  //       return SafeArea(
-  //         child: Column(
-  //           mainAxisSize: MainAxisSize.min,
-  //           children: [
-  //             const SizedBox(height: 10),
-  //             SizedBox(
-  //               height: 200,
-  //               child: Row(
-  //                 mainAxisAlignment: MainAxisAlignment.center,
-  //                 children: [
-  //                   // 整数部
-  //                   Expanded(
-  //                     child: CupertinoPicker(
-  //                       scrollController: FixedExtentScrollController(
-  //                           initialItem: selectedInteger),
-  //                       itemExtent: 40,
-  //                       onSelectedItemChanged: (int value) {
-  //                         selectedInteger = value;
-  //                       },
-  //                       children: List.generate(200, (index) {
-  //                         return Center(
-  //                           child: Text(
-  //                             index.toString().padLeft(2, '0'),
-  //                             style: const TextStyle(
-  //                                 fontSize: 30, color: Colors.black),
-  //                           ),
-  //                         );
-  //                       }),
-  //                     ),
-  //                   ),
-  //                   // 小数点
-  //                   const Text(
-  //                     '.',
-  //                     style: TextStyle(fontSize: 30, color: Colors.black),
-  //                   ),
-  //                   // 小数部
-  //                   Expanded(
-  //                     child: CupertinoPicker(
-  //                       scrollController: FixedExtentScrollController(
-  //                           initialItem: selectedDecimal),
-  //                       itemExtent: 40,
-  //                       onSelectedItemChanged: (int value) {
-  //                         selectedDecimal = value;
-  //                       },
-  //                       children: List.generate(100, (index) {
-  //                         return Center(
-  //                           child: Text(
-  //                             index.toString().padLeft(2, '0'),
-  //                             style: const TextStyle(
-  //                                 fontSize: 30, color: Colors.black),
-  //                           ),
-  //                         );
-  //                       }),
-  //                     ),
-  //                   ),
-  //                   const Text(
-  //                     'kg',
-  //                     style: TextStyle(fontSize: 20, color: Colors.black54),
-  //                   ),
-  //                   const SizedBox(
-  //                     width: 10,
-  //                   )
-  //                 ],
-  //               ),
-  //             ),
-  //             const Divider(height: 1),
-  //             Row(
-  //               children: [
-  //                 Expanded(
-  //                   child: TextButton(
-  //                     onPressed: () {
-  //                       Navigator.pop(context);
-  //                     },
-  //                     child: const Text(
-  //                       'キャンセル',
-  //                       style: TextStyle(fontSize: 16, color: Colors.black54),
-  //                     ),
-  //                   ),
-  //                 ),
-  //                 const VerticalDivider(width: 1),
-  //                 Expanded(
-  //                   child: TextButton(
-  //                     onPressed: () {
-  //                       String result =
-  //                           '${selectedInteger.toString().padLeft(2, '0')}.${selectedDecimal.toString().padLeft(2, '0')}';
-  //                       setState(() {
-  //                         // ここで状態を更新する（必要に応じて）
-  //                         weight = result;
-  //                         // BMI, 目標まで
-  //                         if (weight != '00.00') {
-  //                           // 00.00kgではない場合
-  //                           bmi = myHeight == 0
-  //                               ? 00.00
-  //                               : double.parse(weight) /
-  //                                   ((myHeight / 100) * (myHeight / 100));
-  //                           bmi = double.parse(bmi.toStringAsFixed(1));
-  //                           untilTarget = double.parse(
-  //                               (targetWeight - double.parse(weight))
-  //                                   .toStringAsFixed(2));
-  //                         } else {
-  //                           // 00.00kgの場合
-  //                           bmi = 00.00;
-  //                           untilTarget = 00.00;
-  //                         }
-  //                       });
-  //                       objectBox.addWeight(
-  //                           focusedDay: widget.focusedDay.toString(),
-  //                           weight: double.parse(
-  //                               double.parse(weight).toStringAsFixed(2)),
-  //                           datetime: widget.focusedDay);
-  //                       Navigator.pop(context);
-  //                     },
-  //                     child: const Text(
-  //                       '完了',
-  //                       style: TextStyle(fontSize: 16, color: Colors.black54),
-  //                     ),
-  //                   ),
-  //                 ),
-  //               ],
-  //             ),
-  //           ],
-  //         ),
-  //       );
-  //     },
-  //   );
-  // }
-
-  // void bodyFatRatePicker() {
-  //   int selectedInteger = 20; // 初期値: 20
-  //   int selectedDecimal = 0; // 初期値: .00
-
-  //   if (double.parse(bodyFatRate) != 0) {
-  //     // ドラムロールの表示用
-  //     // bodyFatRateを小数点の右側と左側に分ける
-  //     List<String> parts = bodyFatRate.split('.');
-  //     selectedInteger = int.parse(parts[0]);
-  //     selectedDecimal = int.parse(parts[1]);
-  //   }
-
-  //   showModalBottomSheet(
-  //     context: context,
-  //     backgroundColor: Colors.white,
-  //     isScrollControlled: true,
-  //     shape: const RoundedRectangleBorder(
-  //       borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-  //     ),
-  //     builder: (BuildContext context) {
-  //       return SafeArea(
-  //         child: Column(
-  //           mainAxisSize: MainAxisSize.min,
-  //           children: [
-  //             const SizedBox(height: 10),
-  //             SizedBox(
-  //               height: 200,
-  //               child: Row(
-  //                 mainAxisAlignment: MainAxisAlignment.center,
-  //                 children: [
-  //                   // 整数部
-  //                   Expanded(
-  //                     child: CupertinoPicker(
-  //                       scrollController: FixedExtentScrollController(
-  //                           initialItem: selectedInteger),
-  //                       itemExtent: 40,
-  //                       onSelectedItemChanged: (int value) {
-  //                         selectedInteger = value;
-  //                       },
-  //                       children: List.generate(200, (index) {
-  //                         return Center(
-  //                           child: Text(
-  //                             index.toString().padLeft(2, '0'),
-  //                             style: const TextStyle(
-  //                                 fontSize: 30, color: Colors.black),
-  //                           ),
-  //                         );
-  //                       }),
-  //                     ),
-  //                   ),
-  //                   // 小数点
-  //                   const Text(
-  //                     '.',
-  //                     style: TextStyle(fontSize: 30, color: Colors.black),
-  //                   ),
-  //                   // 小数部
-  //                   Expanded(
-  //                     child: CupertinoPicker(
-  //                       scrollController: FixedExtentScrollController(
-  //                           initialItem: selectedDecimal),
-  //                       itemExtent: 40,
-  //                       onSelectedItemChanged: (int value) {
-  //                         selectedDecimal = value;
-  //                       },
-  //                       children: List.generate(100, (index) {
-  //                         return Center(
-  //                           child: Text(
-  //                             index.toString().padLeft(2, '0'),
-  //                             style: const TextStyle(
-  //                                 fontSize: 30, color: Colors.black),
-  //                           ),
-  //                         );
-  //                       }),
-  //                     ),
-  //                   ),
-  //                   const Text(
-  //                     '%',
-  //                     style: TextStyle(fontSize: 20, color: Colors.black54),
-  //                   ),
-  //                   const SizedBox(
-  //                     width: 10,
-  //                   )
-  //                 ],
-  //               ),
-  //             ),
-  //             const Divider(height: 1),
-  //             Row(
-  //               children: [
-  //                 Expanded(
-  //                   child: TextButton(
-  //                     onPressed: () {
-  //                       Navigator.pop(context);
-  //                     },
-  //                     child: const Text(
-  //                       'キャンセル',
-  //                       style: TextStyle(fontSize: 16, color: Colors.black54),
-  //                     ),
-  //                   ),
-  //                 ),
-  //                 const VerticalDivider(width: 1),
-  //                 Expanded(
-  //                   child: TextButton(
-  //                     onPressed: () {
-  //                       String result =
-  //                           '${selectedInteger.toString().padLeft(2, '0')}.${selectedDecimal.toString().padLeft(2, '0')}';
-  //                       setState(() {
-  //                         // ここで状態を更新する（必要に応じて）
-  //                         bodyFatRate = result;
-  //                       });
-  //                       objectBox.addBodyFatRate(
-  //                           focusedDay: widget.focusedDay.toString(),
-  //                           bodyFatRate: double.parse(
-  //                               double.parse(bodyFatRate).toStringAsFixed(2)),
-  //                           datetime: widget.focusedDay);
-  //                       Navigator.pop(context);
-  //                     },
-  //                     child: const Text(
-  //                       '完了',
-  //                       style: TextStyle(fontSize: 16, color: Colors.black54),
-  //                     ),
-  //                   ),
-  //                 ),
-  //               ],
-  //             ),
-  //           ],
-  //         ),
-  //       );
-  //     },
-  //   );
-  // }
 }
 
 // ---------------------------
@@ -819,7 +541,7 @@ class _WeightEditingDialogState extends ConsumerState<WeightEditingDialog> {
         onFieldSubmitted: (_) {
           // エンターを押したときに実行される
           if (controller.text.isNotEmpty) {
-            objectBox.addWeight(
+            objectBox.weightRepository.addWeight(
                 focusedDay: widget.focusedDay.toString(),
                 weight: double.parse(
                     double.parse(controller.text).toStringAsFixed(2)),
@@ -832,24 +554,23 @@ class _WeightEditingDialogState extends ConsumerState<WeightEditingDialog> {
         TextButton(
           onPressed: () async {
             if (controller.text.isNotEmpty) {
-              objectBox.addWeight(
+              objectBox.weightRepository.addWeight(
                   focusedDay: widget.focusedDay.toString(),
                   weight: double.parse(
                       double.parse(controller.text).toStringAsFixed(2)),
                   datetime: widget.focusedDay);
             }
-            List<Weight> monthWeights = objectBox.getWeights(
+            List<Weight> monthWeights = objectBox.weightRepository.getWeights(
                 months: 1,
                 datetime: DateTime.parse(
                     DateTime(DateTime.now().year, DateTime.now().month, 1)
                         .toString()));
             Navigator.of(context).pop(controller.text);
-            if (monthWeights.length == 3) {
+            if (monthWeights.length == 7) {
               showCupertinoDialog(
                   context: context,
                   builder: (BuildContext context) {
                     return CupertinoAlertDialog(
-                      // title: Text('定期的な使い心地調査にご協力ください'),
                       content: const Text(
                           'いつも日記と体重をご利用いただきありがとうございます。定期的な使い心地調査にご協力お願いいたします。アプリの使い心地はいかがですか？'),
                       actions: <Widget>[
