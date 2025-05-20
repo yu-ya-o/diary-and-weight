@@ -82,10 +82,12 @@ class _WeightWritingPageState extends State<WeightWritingPage> {
     bodyFatRate = widget.bodyFatRate;
     // 目標体重取得
     targetWeight = double.parse(
-        double.parse(objectBox.getTargtWeight()).toStringAsFixed(2));
+        double.parse(objectBox.settingRepository.getTargtWeight())
+            .toStringAsFixed(2));
     // 身長取得
-    myHeight =
-        double.parse(double.parse(objectBox.getHeight()).toStringAsFixed(2));
+    myHeight = double.parse(
+        double.parse(objectBox.settingRepository.getHeight())
+            .toStringAsFixed(2));
     // BMI, 目標まで
     if (weight != '00.00') {
       // 00.00kgではない場合
@@ -101,8 +103,8 @@ class _WeightWritingPageState extends State<WeightWritingPage> {
       untilTarget = 00.00;
     }
     // 日記の取得
-    List<Diary> diaryList =
-        objectBox.getDiary(selectedDay: widget.focusedDay.toString());
+    List<Diary> diaryList = objectBox.diaryRepository
+        .getDiary(selectedDay: widget.focusedDay.toString());
     // TextFormFieldに初期値を代入する
     if (diaryList.isNotEmpty) {
       content = diaryList.first.content;
@@ -138,7 +140,7 @@ class _WeightWritingPageState extends State<WeightWritingPage> {
                   focusNode.unfocus();
 
                   // 日記を保存
-                  objectBox.addDiary(
+                  objectBox.diaryRepository.addDiary(
                       writingDate: widget.focusedDay.toString(),
                       content: content,
                       datetime:
@@ -277,6 +279,7 @@ class _WeightWritingPageState extends State<WeightWritingPage> {
                       context, bodyFatRate, focusedDay);
                   setState(() {
                     List<BodyFatRate> bodyFatRateList = objectBox
+                        .bodyFatRateRepository
                         .getBodyFatRate(selectedDay: focusedDay.toString());
                     if (bodyFatRateList.isNotEmpty) {
                       bodyFatRate =
@@ -490,7 +493,7 @@ class _WeightEditingDialogState extends ConsumerState<WeightEditingDialog> {
   @override
   Widget build(BuildContext context) {
     themeColor = ref.watch(themeColorProvider);
-    var themeColorString = objectBox.getThemeColor();
+    var themeColorString = objectBox.settingRepository.getThemeColor();
 
     if (themeColorString == 'lime') {
       themeColor = Colors.lime;
@@ -727,7 +730,7 @@ class _BodyFatRateEditingDialogState
   @override
   Widget build(BuildContext context) {
     themeColor = ref.watch(themeColorProvider);
-    var themeColorString = objectBox.getThemeColor();
+    var themeColorString = objectBox.settingRepository.getThemeColor();
 
     if (themeColorString == 'lime') {
       themeColor = Colors.lime;
@@ -778,7 +781,7 @@ class _BodyFatRateEditingDialogState
         onFieldSubmitted: (_) {
           // エンターを押したときに実行される
           if (controller.text.isNotEmpty) {
-            objectBox.addBodyFatRate(
+            objectBox.bodyFatRateRepository.addBodyFatRate(
                 focusedDay: widget.focusedDay.toString(),
                 bodyFatRate: double.parse(
                     double.parse(controller.text).toStringAsFixed(2)),
@@ -791,7 +794,7 @@ class _BodyFatRateEditingDialogState
         TextButton(
           onPressed: () async {
             if (controller.text.isNotEmpty) {
-              objectBox.addBodyFatRate(
+              objectBox.bodyFatRateRepository.addBodyFatRate(
                   focusedDay: widget.focusedDay.toString(),
                   bodyFatRate: double.parse(
                       double.parse(controller.text).toStringAsFixed(2)),

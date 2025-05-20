@@ -76,7 +76,7 @@ class _WeightChartState extends ConsumerState<WeightChart> {
       weights.add(weight.weight);
       dates.add(weight.datetime);
     }
-    targetWeight = double.parse(objectBox.getTargtWeight());
+    targetWeight = double.parse(objectBox.settingRepository.getTargtWeight());
   }
 
   @override
@@ -97,11 +97,11 @@ class _WeightChartState extends ConsumerState<WeightChart> {
       averageWeight = 0.0;
     }
 
-    targetWeight = double.parse(objectBox.getTargtWeight());
+    targetWeight = double.parse(objectBox.settingRepository.getTargtWeight());
 
     // テーマカラーのプロバイダーを監視
     themeColor = ref.watch(themeColorProvider);
-    var themeColorString = objectBox.getThemeColor();
+    var themeColorString = objectBox.settingRepository.getThemeColor();
 
     if (themeColorString == 'lime') {
       themeColor = Colors.lime;

@@ -45,8 +45,8 @@ class _SettingsPageState extends State<SettingsPage> {
   @override
   void initState() {
     super.initState();
-    targetWeight = objectBox.getTargtWeight();
-    height = objectBox.getHeight();
+    targetWeight = objectBox.settingRepository.getTargtWeight();
+    height = objectBox.settingRepository.getHeight();
 
     if (targetWeight.isEmpty) {
       targetWeight = '--.-';
@@ -98,7 +98,7 @@ class _SettingsPageState extends State<SettingsPage> {
               onTap: () async {
                 await DialogUtils.showHeightDialog(context, height);
                 setState(() {
-                  height = objectBox.getHeight();
+                  height = objectBox.settingRepository.getHeight();
                 });
               },
               behavior: HitTestBehavior.opaque,
@@ -132,7 +132,7 @@ class _SettingsPageState extends State<SettingsPage> {
               onTap: () async {
                 await DialogUtils.showWeightDialog(context, targetWeight);
                 setState(() {
-                  targetWeight = objectBox.getTargtWeight();
+                  targetWeight = objectBox.settingRepository.getTargtWeight();
                 });
               },
               behavior: HitTestBehavior.opaque,
@@ -393,7 +393,7 @@ class _TargetWeightDialogState extends ConsumerState<TargetWeightDialog> {
 
   @override
   Widget build(BuildContext context) {
-    var themeColorString = objectBox.getThemeColor();
+    var themeColorString = objectBox.settingRepository.getThemeColor();
 
     if (themeColorString == 'lime') {
       themeColor = Colors.lime;
@@ -444,7 +444,7 @@ class _TargetWeightDialogState extends ConsumerState<TargetWeightDialog> {
         onFieldSubmitted: (_) {
           // エンターを押したときに実行される
           if (controller.text.isNotEmpty) {
-            objectBox.addTargetWeight(
+            objectBox.settingRepository.addTargetWeight(
                 targetWeight: double.parse(controller.text).toStringAsFixed(2));
           }
           Navigator.of(context).pop(controller.text);
@@ -454,7 +454,7 @@ class _TargetWeightDialogState extends ConsumerState<TargetWeightDialog> {
         TextButton(
           onPressed: () async {
             if (controller.text.isNotEmpty) {
-              objectBox.addTargetWeight(
+              objectBox.settingRepository.addTargetWeight(
                   targetWeight:
                       double.parse(controller.text).toStringAsFixed(2));
             }
@@ -511,7 +511,7 @@ class _HeightDialogState extends ConsumerState<HeightDialog> {
   Widget build(BuildContext context) {
     // テーマカラーのプロバイダーを監視
     themeColor = ref.watch(themeColorProvider);
-    var themeColorString = objectBox.getThemeColor();
+    var themeColorString = objectBox.settingRepository.getThemeColor();
 
     if (themeColorString == 'lime') {
       themeColor = Colors.lime;
@@ -562,7 +562,7 @@ class _HeightDialogState extends ConsumerState<HeightDialog> {
         onFieldSubmitted: (_) {
           // エンターを押したときに実行される
           if (controller.text.isNotEmpty) {
-            objectBox.addHeight(
+            objectBox.settingRepository.addHeight(
                 height: double.parse(controller.text).toStringAsFixed(2));
           }
           Navigator.of(context).pop(controller.text);
@@ -572,7 +572,7 @@ class _HeightDialogState extends ConsumerState<HeightDialog> {
         TextButton(
           onPressed: () async {
             if (controller.text.isNotEmpty) {
-              objectBox.addHeight(
+              objectBox.settingRepository.addHeight(
                   height: double.parse(controller.text).toStringAsFixed(2));
             }
             Navigator.of(context).pop(controller.text);
@@ -625,7 +625,7 @@ class _SelecteThemeColorPageState extends ConsumerState<SelecteThemeColorPage> {
                 children: [
                   GestureDetector(
                     onTap: () async {
-                      objectBox.addThemeColor(color: 'lime');
+                      objectBox.settingRepository.addThemeColor(color: 'lime');
                       ref
                           .read(themeColorProvider.notifier)
                           .updateColor(Colors.lime);
@@ -667,7 +667,8 @@ class _SelecteThemeColorPageState extends ConsumerState<SelecteThemeColorPage> {
                   ),
                   GestureDetector(
                     onTap: () async {
-                      objectBox.addThemeColor(color: 'lime-shade');
+                      objectBox.settingRepository
+                          .addThemeColor(color: 'lime-shade');
                       ref
                           .read(themeColorProvider.notifier)
                           .updateColor(Colors.lime.shade300);
@@ -709,7 +710,8 @@ class _SelecteThemeColorPageState extends ConsumerState<SelecteThemeColorPage> {
                   ),
                   GestureDetector(
                     onTap: () async {
-                      objectBox.addThemeColor(color: 'orange');
+                      objectBox.settingRepository
+                          .addThemeColor(color: 'orange');
                       ref
                           .read(themeColorProvider.notifier)
                           .updateColor(Colors.orange);
@@ -750,7 +752,8 @@ class _SelecteThemeColorPageState extends ConsumerState<SelecteThemeColorPage> {
                   ),
                   GestureDetector(
                     onTap: () async {
-                      objectBox.addThemeColor(color: 'orange-shade');
+                      objectBox.settingRepository
+                          .addThemeColor(color: 'orange-shade');
                       ref
                           .read(themeColorProvider.notifier)
                           .updateColor(Colors.orange.shade300);
@@ -791,7 +794,7 @@ class _SelecteThemeColorPageState extends ConsumerState<SelecteThemeColorPage> {
                   ),
                   GestureDetector(
                     onTap: () async {
-                      objectBox.addThemeColor(color: 'red');
+                      objectBox.settingRepository.addThemeColor(color: 'red');
                       ref
                           .read(themeColorProvider.notifier)
                           .updateColor(Colors.red);
@@ -832,7 +835,8 @@ class _SelecteThemeColorPageState extends ConsumerState<SelecteThemeColorPage> {
                   ),
                   GestureDetector(
                     onTap: () async {
-                      objectBox.addThemeColor(color: 'red-shade');
+                      objectBox.settingRepository
+                          .addThemeColor(color: 'red-shade');
                       ref
                           .read(themeColorProvider.notifier)
                           .updateColor(Colors.red.shade300);
@@ -872,7 +876,8 @@ class _SelecteThemeColorPageState extends ConsumerState<SelecteThemeColorPage> {
                   ),
                   GestureDetector(
                     onTap: () async {
-                      objectBox.addThemeColor(color: 'purple');
+                      objectBox.settingRepository
+                          .addThemeColor(color: 'purple');
                       ref
                           .read(themeColorProvider.notifier)
                           .updateColor(Colors.purple);
@@ -913,7 +918,8 @@ class _SelecteThemeColorPageState extends ConsumerState<SelecteThemeColorPage> {
                   ),
                   GestureDetector(
                     onTap: () async {
-                      objectBox.addThemeColor(color: 'purple-shade');
+                      objectBox.settingRepository
+                          .addThemeColor(color: 'purple-shade');
                       ref
                           .read(themeColorProvider.notifier)
                           .updateColor(Colors.purple.shade300);
@@ -954,7 +960,7 @@ class _SelecteThemeColorPageState extends ConsumerState<SelecteThemeColorPage> {
                   ),
                   GestureDetector(
                     onTap: () async {
-                      objectBox.addThemeColor(color: 'green');
+                      objectBox.settingRepository.addThemeColor(color: 'green');
                       ref
                           .read(themeColorProvider.notifier)
                           .updateColor(Colors.green);
@@ -995,7 +1001,8 @@ class _SelecteThemeColorPageState extends ConsumerState<SelecteThemeColorPage> {
                   ),
                   GestureDetector(
                     onTap: () async {
-                      objectBox.addThemeColor(color: 'green-shade');
+                      objectBox.settingRepository
+                          .addThemeColor(color: 'green-shade');
                       ref
                           .read(themeColorProvider.notifier)
                           .updateColor(Colors.green.shade300);
@@ -1036,7 +1043,7 @@ class _SelecteThemeColorPageState extends ConsumerState<SelecteThemeColorPage> {
                   ),
                   GestureDetector(
                     onTap: () async {
-                      objectBox.addThemeColor(color: 'blue');
+                      objectBox.settingRepository.addThemeColor(color: 'blue');
                       ref
                           .read(themeColorProvider.notifier)
                           .updateColor(Colors.blue);
@@ -1077,7 +1084,8 @@ class _SelecteThemeColorPageState extends ConsumerState<SelecteThemeColorPage> {
                   ),
                   GestureDetector(
                     onTap: () async {
-                      objectBox.addThemeColor(color: 'blue-shade');
+                      objectBox.settingRepository
+                          .addThemeColor(color: 'blue-shade');
                       ref
                           .read(themeColorProvider.notifier)
                           .updateColor(Colors.blue.shade300);

@@ -242,19 +242,22 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
     weightList = objectBox.weightRepository
         .getWeight(selectedDay: _focusedDay.toString());
     // 今日の体脂肪率取得
-    bodyFatRateList =
-        objectBox.getBodyFatRate(selectedDay: _focusedDay.toString());
+    bodyFatRateList = objectBox.bodyFatRateRepository
+        .getBodyFatRate(selectedDay: _focusedDay.toString());
     // 今日の日記取得
-    diaryList = objectBox.getDiary(selectedDay: _focusedDay.toString());
+    diaryList =
+        objectBox.diaryRepository.getDiary(selectedDay: _focusedDay.toString());
     // 毎日の体重取得（カレンダー表示用）
     allWeightList = objectBox.weightRepository.getAllWeights();
 
     // 目標体重取得
     targetWeight = double.parse(
-        double.parse(objectBox.getTargtWeight()).toStringAsFixed(2));
+        double.parse(objectBox.settingRepository.getTargtWeight())
+            .toStringAsFixed(2));
     // 身長取得
-    myHeight =
-        double.parse(double.parse(objectBox.getHeight()).toStringAsFixed(2));
+    myHeight = double.parse(
+        double.parse(objectBox.settingRepository.getHeight())
+            .toStringAsFixed(2));
 
     if (weightList.isNotEmpty) {
       // 今日の体重が存在する場合
@@ -315,10 +318,11 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
     weightList = objectBox.weightRepository
         .getWeight(selectedDay: _focusedDay.toString());
     // 今日の体脂肪率取得
-    bodyFatRateList =
-        objectBox.getBodyFatRate(selectedDay: _focusedDay.toString());
+    bodyFatRateList = objectBox.bodyFatRateRepository
+        .getBodyFatRate(selectedDay: _focusedDay.toString());
     // 今日の日記取得
-    diaryList = objectBox.getDiary(selectedDay: _focusedDay.toString());
+    diaryList =
+        objectBox.diaryRepository.getDiary(selectedDay: _focusedDay.toString());
     // 先月の体重取得
     _lastMonth = DateTime.parse(
         DateTime(_focusedDay.year, _focusedDay.month - 1, _focusedDay.day)
@@ -361,10 +365,12 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
 
     // 目標体重取得
     targetWeight = double.parse(
-        double.parse(objectBox.getTargtWeight()).toStringAsFixed(2));
+        double.parse(objectBox.settingRepository.getTargtWeight())
+            .toStringAsFixed(2));
     // 身長取得
-    myHeight =
-        double.parse(double.parse(objectBox.getHeight()).toStringAsFixed(2));
+    myHeight = double.parse(
+        double.parse(objectBox.settingRepository.getHeight())
+            .toStringAsFixed(2));
 
     if (weightList.isNotEmpty) {
       // 今日の体重が存在する場合
@@ -416,7 +422,7 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
 
     // テーマカラーのプロバイダーを監視
     themeColor = ref.watch(themeColorProvider);
-    var themeColorString = objectBox.getThemeColor();
+    var themeColorString = objectBox.settingRepository.getThemeColor();
 
     if (themeColorString == 'lime') {
       themeColor = Colors.lime;
@@ -698,10 +704,10 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
                       .toString());
                   weightList = objectBox.weightRepository
                       .getWeight(selectedDay: selectedDay.toString());
-                  bodyFatRateList = objectBox.getBodyFatRate(
-                      selectedDay: _focusedDay.toString());
-                  diaryList =
-                      objectBox.getDiary(selectedDay: selectedDay.toString());
+                  bodyFatRateList = objectBox.bodyFatRateRepository
+                      .getBodyFatRate(selectedDay: _focusedDay.toString());
+                  diaryList = objectBox.diaryRepository
+                      .getDiary(selectedDay: selectedDay.toString());
 
                   setState(() {
                     _currentDay = selectedDay;
@@ -1228,7 +1234,7 @@ class _TextEditingDialogState extends ConsumerState<TextEditingDialog> {
   @override
   Widget build(BuildContext context) {
     themeColor = ref.watch(themeColorProvider);
-    var themeColorString = objectBox.getThemeColor();
+    var themeColorString = objectBox.settingRepository.getThemeColor();
 
     if (themeColorString == 'lime') {
       themeColor = Colors.lime;

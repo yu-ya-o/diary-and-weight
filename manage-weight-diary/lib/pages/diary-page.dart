@@ -32,7 +32,7 @@ class _DiaryPageState extends ConsumerState<DiaryPage> {
 
     setState(() {
       displayDate = DateTime(datetime.year, datetime.month, 1);
-      diaryList = objectBox.getDiaryForDateTime(displayDate);
+      diaryList = objectBox.diaryRepository.getDiaryForDateTime(displayDate);
     });
   }
 
@@ -94,7 +94,7 @@ class _DiaryPageState extends ConsumerState<DiaryPage> {
   void initState() {
     super.initState();
     displayDate = DateTime.now();
-    diaryList = objectBox.getDiaryForDateTime(displayDate);
+    diaryList = objectBox.diaryRepository.getDiaryForDateTime(displayDate);
 
     // WidgetsBinding.instance.addPostFrameCallback((_) => _showStartDialog());
   }
@@ -103,11 +103,11 @@ class _DiaryPageState extends ConsumerState<DiaryPage> {
   Widget build(BuildContext context) {
     final days = ["", "月", "火", "水", "木", "金", "土", "日"];
     // displayDate = DateTime.now();
-    diaryList = objectBox.getDiaryForDateTime(displayDate);
+    diaryList = objectBox.diaryRepository.getDiaryForDateTime(displayDate);
 
     // テーマカラーのプロバイダーを監視
     themeColor = ref.watch(themeColorProvider);
-    var themeColorString = objectBox.getThemeColor();
+    var themeColorString = objectBox.settingRepository.getThemeColor();
 
     if (themeColorString == 'lime') {
       themeColor = Colors.lime;

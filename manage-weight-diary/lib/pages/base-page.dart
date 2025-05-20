@@ -24,7 +24,7 @@ class _BasePageState extends ConsumerState<BasePage> {
   Widget build(BuildContext context) {
     // テーマカラーのプロバイダーを監視
     themeColor = ref.watch(themeColorProvider);
-    var themeColorString = objectBox.getThemeColor();
+    var themeColorString = objectBox.settingRepository.getThemeColor();
 
     if (themeColorString == 'lime') {
       themeColor = Colors.lime;

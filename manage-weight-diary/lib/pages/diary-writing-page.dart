@@ -62,8 +62,8 @@ class _DiaryWritingPageState extends State<DiaryWritingPage> {
   @override
   void initState() {
     super.initState();
-    List<Diary> diaryList =
-        objectBox.getDiary(selectedDay: widget.focusedDay.toString());
+    List<Diary> diaryList = objectBox.diaryRepository
+        .getDiary(selectedDay: widget.focusedDay.toString());
     // TextFormFieldに初期値を代入する
     if (diaryList.isNotEmpty) {
       content = diaryList.first.content;
@@ -99,13 +99,14 @@ class _DiaryWritingPageState extends State<DiaryWritingPage> {
                     focusNode.unfocus();
 
                     // 日記を保存
-                    objectBox.addDiary(
+                    objectBox.diaryRepository.addDiary(
                         writingDate: widget.focusedDay.toString(),
                         content: content,
                         datetime: DateTime.parse(widget.focusedDay.toString())
                             .toUtc());
-                    List<Diary> diaryWeights = objectBox.getDiaryForDateTime(
-                        DateTime(DateTime.now().year, DateTime.now().month, 1));
+                    List<Diary> diaryWeights = objectBox.diaryRepository
+                        .getDiaryForDateTime(DateTime(
+                            DateTime.now().year, DateTime.now().month, 1));
                     if (diaryWeights.length == 10) {
                       showCupertinoDialog(
                           context: context,

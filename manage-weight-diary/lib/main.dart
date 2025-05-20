@@ -1,5 +1,5 @@
 import 'package:disiry_weight_mng/pages/base-page.dart';
-import 'package:disiry_weight_mng/repository/object-box.dart';
+import 'package:disiry_weight_mng/objectbox/object-box.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
